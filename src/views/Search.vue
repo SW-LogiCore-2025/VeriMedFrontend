@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from "@/services/api.js";
+import SearchProductLayout from "@/components/layout/SearchProductLayout.vue";
+import SearchBtnComponent from "@/components/ui/SearchBtnComponent.vue";
 
 const searchCode = ref('')
 const products = ref([])
@@ -45,54 +47,89 @@ const registerProduct = async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Gestión de Productos</h1>
+  <section class="search-product d-flex justify-content-center">
+    <div class="container">
+      <div class="row my-5">
+        <h2 class="text-center mb-4">Buscar Producto</h2>
+        <div class="container" style="max-width: 1000px">
+          <form @submit.prevent="fetchProducts" class="bg-white shadow p-4 rounded">
+            <div class="mb-3">
+              <label for="searchCode" class="form-label">Código del producto</label>
+              <input v-model="searchCode" type="text" id="searchCode" class="form-control" required />
+            </div>
+            <div class="text-center">
+              <SearchBtnComponent />
+            </div>
+          </form>
+        </div>
 
-    <!-- Buscar productos -->
-    <form @submit.prevent="fetchProducts" class="mb-6 space-y-4 bg-white shadow p-4 rounded-xl">
-      <h2 class="text-xl font-semibold">Buscar Producto</h2>
-      <div>
-        <label class="block mb-1 font-medium">Código del producto</label>
-        <input v-model="searchCode" type="text" class="w-full border px-4 py-2 rounded" required />
+        <!-- Results -->
+        <div v-if="products.length" class="mt-4">
+          <h2 class="h5 mb-3">Resultados</h2>
+          <ul class="list-group">
+            <li v-for="product in products" :key="product.id" class="list-group-item">
+              <p><strong>ID:</strong> {{ product.id }}</p>
+              <p><strong>Serial:</strong> {{ product.serialNumber }}</p>
+              <p><strong>Nombre:</strong> {{ product.name.code }}</p>
+              <p><strong>Fabricante:</strong> {{ product.manufacturer }}</p>
+            </li>
+          </ul>
+        </div>
       </div>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Buscar</button>
-    </form>
-
-    <!-- Resultados -->
-    <div v-if="products.length" class="mb-6">
-      <h2 class="text-xl font-semibold mb-2">Resultados</h2>
-      <ul class="space-y-2">
-        <li v-for="product in products" :key="product.id" class="p-4 border rounded shadow">
-          <p><strong>ID:</strong> {{ product.id }}</p>
-          <p><strong>Serial:</strong> {{ product.serialNumber }}</p>
-          <p><strong>Nombre:</strong> {{ product.name.code }}</p>
-          <p><strong>Fabricante:</strong> {{ product.manufacturer }}</p>
-        </li>
-      </ul>
     </div>
+  </section>
 
-    <!-- Registrar producto -->
-    <form @submit.prevent="registerProduct" class="space-y-4 bg-white shadow p-4 rounded-xl">
-      <h2 class="text-xl font-semibold">Registrar Producto</h2>
-      <div>
-        <label class="block mb-1 font-medium">Código del lote</label>
-        <input v-model="newProduct.batchCode" type="text" class="w-full border px-4 py-2 rounded" required />
+  <section class="register-product d-flex justify-content-center">
+    <div class="container">
+      <div class="row my-5">
+        <h2 class="text-center mb-4">Registrar Producto</h2>
+        <div class="container" style="max-width: 1000px">
+          <form @submit.prevent="registerProduct" class="bg-white shadow p-4 rounded">
+            <div class="mb-3">
+              <label for="batchCode" class="form-label">Código del lote</label>
+              <input v-model="newProduct.batchCode" type="text" id="batchCode" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label for="productTypeId" class="form-label">Tipo de producto</label>
+              <select v-model="newProduct.productTypeId" id="productTypeId" class="form-select" required>
+                <option value="" disabled>Seleccione un tipo de producto</option>
+                <option v-for="type in productTypes" :key="type.id" :value="type.id">
+                  {{ type.name }} - {{ type.manufacturer }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="quantity" class="form-label">Cantidad</label>
+              <input v-model.number="newProduct.quantity" type="number" id="quantity" class="form-control" required />
+            </div>
+            <SearchBtnComponent button-text="Register" class="text-center"/>
+          </form>
+        </div>
       </div>
-      <div>
-        <label class="block mb-1 font-medium">Tipo de producto</label>
-        <select v-model="newProduct.productTypeId" class="w-full border px-4 py-2 rounded" required>
-          <option value="" disabled>Seleccione un tipo de producto</option>
-          <option v-for="type in productTypes" :key="type.id" :value="type.id">
-            {{ type.name }} - {{ type.manufacturer }}
-          </option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block mb-1 font-medium">Cantidad</label>
-        <input v-model.number="newProduct.quantity" type="number" class="w-full border px-4 py-2 rounded" required />
-      </div>
-      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Registrar</button>
-    </form>
-  </div>
+    </div>
+  </section>
 </template>
+
+<style scoped>
+.search-product {
+  background: var(--background-color);
+  margin-top: 150px;
+}
+.register-product {
+  background: var(--background-color);
+}
+
+h2 {
+  color: var(--text-color);
+  font-family: 'Funnel Sans', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+label {
+  color: var(--text-color);
+  font-family: 'Albert Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+</style>

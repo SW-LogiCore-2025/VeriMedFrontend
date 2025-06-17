@@ -1,117 +1,46 @@
 <template>
-  <div ref="appWrapper">
-    <header class="header">
-      <router-link to="/" class="nav-link logo">VeriMed</router-link>
+  <header>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  </header>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top">
+    <NavbarLayout/>
+  </nav>
+  <RouterView />
+  <footer>
 
-      <!-- Botón de menú -->
-      <button class="menu-btn" @click="toggleMenu">
-        {{ menuOpen ? '✕' : '☰' }}
-      </button>
-
-      <!-- Navegación -->
-      <nav
-        ref="navMenu"
-        :class="['nav-links', { open: menuOpen }]"
-      >
-        <router-link to="/" class="nav-link" @click="closeMenu">Home</router-link>
-        <router-link to="/search" class="nav-link" @click="closeMenu">Search</router-link>
-        <!-- <router-link to="/profile" class="nav-link" @click="closeMenu">Profile</router-link> -->
-      </nav>
-    </header>
-
-    <router-view />
-  </div>
+  </footer>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      menuOpen: false
-    };
-  },
-  methods: {
-    toggleMenu() {
-      this.menuOpen = !this.menuOpen;
-      if (this.menuOpen) {
-        document.addEventListener('click', this.handleClickOutside);
-      } else {
-        document.removeEventListener('click', this.handleClickOutside);
-      }
-    },
-    closeMenu() {
-      this.menuOpen = false;
-      document.removeEventListener('click', this.handleClickOutside);
-    },
-    handleClickOutside(event) {
-      const nav = this.$refs.navMenu;
-      const button = event.target.closest('.menu-btn');
-      if (nav && !nav.contains(event.target) && !button) {
-        this.closeMenu();
-      }
-    }
-  },
-  beforeUnmount() {
-    document.removeEventListener('click', this.handleClickOutside);
-  }
-};
+<script setup>
+import NavbarLayout from "@/components/layout/NavbarLayout.vue";
 </script>
 
-<style scoped>
-.header {
-  background-color: #003366;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  position: relative;
+<style>
+:root {
+  --primary-color: #142443;
+  --primary-dark-color: #0a1529;
+  --primary-hover-color: #3e4564;
+  --secondary-color: #6c8ac3;
+  --secondary-hover-color: #a4bdec;
+  --background-color: #e6ecf8;
+  --background-light-color: #d1ddf3;
+  --text-color: #142443;
+  --secondary-text-color: #d1ddf3;
+  --tertiary-text-color: #a49e97;
 }
 
-.logo {
-  font-size: 1.5rem;
+html {
+  font-size: 16px;
+  font-family: poppins, sans-serif;
+  background-color: var(--primary-color);
 }
 
-.menu-btn {
-  display: none;
-  font-size: 2rem;
-  color: white;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.nav-link {
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: white;
-  text-decoration: none;
-}
-
-@media (max-width: 768px) {
-  .menu-btn {
-    display: block;
-  }
-
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    background-color: #003366;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 70vw;
-    padding: 1rem;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
+.navbar {
+  background-color: var(--primary-color);
+  color: var(--secondary-text-color);
+  min-height: 80px;
+  font-size: 20px;
 }
 </style>

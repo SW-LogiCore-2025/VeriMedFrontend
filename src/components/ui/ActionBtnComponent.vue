@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <router-link to="/inscribete" class="text-decoration-none">
+  <router-link to="/search" class="text-decoration-none">
     <button class="btn btn-primary btn-lg rounded-pill m-4 px-5 py-3"  style="background-color: var(--secondary-color);">
       <span class="text-white">Search Now</span>
     </button>

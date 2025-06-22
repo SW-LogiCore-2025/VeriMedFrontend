@@ -18,6 +18,12 @@
         <li class="nav-item">
           <router-link class="nav-link mx-3" to="/search">Search</router-link>
         </li>
+        <li class="nav-item">
+          <router-link class="nav-link mx-3" to="/login">Iniciar Sesión</router-link>
+        </li>
+        <li class="nav-item">
+          <router-link class="nav-link mx-3 register-btn" to="/register">Registrarse</router-link>
+        </li>
       </ul>
     </div>
   </div>
@@ -58,6 +64,21 @@
 
 .nav-link.active::after {
   width: 100%;
+}
+
+.register-btn {
+  background-color: var(--secondary-color);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.register-btn::after {
+  display: none;
+}
+
+.register-btn:hover {
+  background-color: var(--secondary-hover-color);
+  transform: translateY(-2px);
 }
 
 button {

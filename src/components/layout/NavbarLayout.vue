@@ -1,35 +1,39 @@
-<script setup>
-
-</script>
-
 <template>
-  <div class="container">
-    <a class="navbar-brand" href="#"><img src="../../assets/logo.png" alt="logo" style="min-width: 100px; max-width: 120px"></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-            aria-label="Toggle navigation">
-      <span class="pi pi-bars"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <router-link class="nav-link mx-3" to="/">Home</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link mx-3" to="/search">Search</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link mx-3" to="/login">Iniciar Sesión</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link mx-3 register-btn" to="/register">Registrarse</router-link>
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
-
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#"><img src="../../assets/logo.png" alt="logo" style="min-width: 100px; max-width: 120px"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+          <span class="pi pi-bars"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <router-link class="nav-link mx-3" to="/">Home</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mx-3" to="/search">Search</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mx-3" to="/login">Iniciar Sesión</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mx-3 register-btn" to="/register">Registrarse</router-link>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </template>
 <style scoped>
+.navbar {
+  background-color: var(--primary-color, #ffffff);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 1030;
+}
+
+/* Mantén todos tus estilos existentes para .nav-link, .register-btn, etc. */
 .nav-link {
   font-size: 18px;
   font-weight: 400;

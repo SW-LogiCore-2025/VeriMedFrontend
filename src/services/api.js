@@ -1,4 +1,3 @@
-// src/api.js
 import axios from 'axios'
 
 const api = axios.create({
@@ -9,22 +8,33 @@ const api = axios.create({
 })
 
 export default {
-  getProductsByCode(code) {
-    return api.get('/product', { params: { code } })
+  // Productos
+  getProductsByBatch(batchCode) {
+    return api.get('/product', { params: { code: batchCode } })
   },
-  registerProduct(product) {
+  createProduct(product) {
     return api.post('/product/batch', product)
   },
+
+  // Tipos de producto
   getProductTypes() {
     return api.get('/product-type')
   },
-  registerProductType(productTypes) {
-    return api.post('/product-type', productTypes)
+  createProductType(productType) {
+    return api.post('/product-type', {
+      name: productType.name,
+      manufacturer: productType.manufacturer
+    })
   },
+
+  // Batches
   getBatches() {
     return api.get('/batch')
   },
-  registerBatch(batch) {
-    return api.post('/batch', batch)
+  createBatch(batch) {
+    return api.post('/batch', {
+      nameBatch: batch.nameBatch,
+      certificateUrl: batch.certificateUrl
+    })
   }
 }

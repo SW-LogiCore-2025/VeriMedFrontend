@@ -6,7 +6,7 @@ Reemplaza tu NavbarLayout.vue con este código
 <template>
   <nav class="navbar navbar-expand-lg navbar-light fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="#"><img src="../../assets/logo.png" alt="logo" style="min-width: 100px; max-width: 120px"></a>
+      <a class="navbar-brand" href="#"><img src="https://res.cloudinary.com/drkelnilg/image/upload/v1752046529/imagen_2025-07-09_023451036-removebg-preview_eaavmj.png" alt="logo" style="min-width: 100px; max-width: 120px"></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
               data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
               aria-label="Toggle navigation">
@@ -105,6 +105,14 @@ router.afterEach(() => {
   background-color: var(--primary-color, #ffffff);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 1030;
+  min-height: var(--navbar-height); /* Mantener la altura del toolbar */
+}
+
+.navbar-brand img {
+  max-height: 70px; /* Limita la altura máxima de la imagen */
+  object-fit: contain; /* Asegura que la imagen mantenga sus proporciones */
+  height: auto; /* Ajusta automáticamente la altura */
+  width: auto; /* Ajusta automáticamente el ancho */
 }
 
 .nav-link {

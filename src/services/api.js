@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api/verimed',
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}api/verimed`, // Usar la variable de entorno
   headers: {
     'Content-Type': 'application/json',
   }
@@ -9,8 +9,14 @@ const api = axios.create({
 
 export default {
   // Productos
-  getProductsByBatch(batchCode) {
-    return api.get('/product', { params: { code: batchCode } })
+  getProducts() {
+    return api.get('/product')
+  },
+  getProductById(id) {
+    return api.get(`/product/${id}`)
+  },
+  getProductsByType() {
+    return api.get('/product/by-type')
   },
   createProduct(product) {
     return api.post('/product/batch', product)
@@ -31,10 +37,16 @@ export default {
   getBatches() {
     return api.get('/batch')
   },
+
   createBatch(batch) {
     return api.post('/batch', {
       nameBatch: batch.nameBatch,
-      certificateUrl: batch.certificateUrl
+      certificateUrl: batch.certificateUrl,
+      userId: batch.userId // Asegúrate de incluir este campo
     })
+  },
+
+  getBatchesByUser(userId) {
+    return api.get(`/batch/by-user/${userId}`)
   }
 }

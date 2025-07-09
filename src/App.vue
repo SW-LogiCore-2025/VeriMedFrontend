@@ -8,9 +8,6 @@
     <NavbarLayout/>
   </nav>
   <RouterView />
-  <footer>
-
-  </footer>
 </template>
 
 <script setup>
@@ -19,7 +16,7 @@ import NavbarLayout from "@/components/layout/NavbarLayout.vue";
 
 <style>
 :root {
-  --primary-color: #142443;
+  --primary-color: #203459;
   --primary-dark: #0a1529;
   --primary-hover-color: #3e4564;
   --secondary-color: #6c8ac3;
@@ -43,11 +40,7 @@ import NavbarLayout from "@/components/layout/NavbarLayout.vue";
   --transition: all 0.3s ease;
 }
 
-html {
-  font-size: 16px;
-  font-family: poppins, sans-serif;
-  background-color: var(--primary-color);
-}
+
 body{
   padding-top: var(--navbar-height);
   margin: 0;

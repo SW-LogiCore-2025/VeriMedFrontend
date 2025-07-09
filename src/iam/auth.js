@@ -5,7 +5,7 @@ class SimpleAuth {
   constructor() {
     this.currentUser = storage.getUser()
     this.isLoggedIn = !!this.currentUser
-    this.baseURL = 'http://localhost:8080/api/v1/authentication' // Ajusta el puerto según tu backend
+    this.baseURL = `${import.meta.env.VITE_BACKEND_URL}api/v1/authentication` // Construir la URL completa
   }
 
   // Login con endpoint real

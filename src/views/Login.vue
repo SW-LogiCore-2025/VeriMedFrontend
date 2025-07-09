@@ -79,77 +79,58 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { login } from '@/iam/auth.js' // ← NUEVA IMPORTACIÓN
+import { login } from '@/iam/auth.js'
 
 const router = useRouter()
 const formRef = ref(null)
 const isVisible = ref(false)
 const loading = ref(false)
-const error = ref('') // ← NUEVO: para mostrar errores
+const error = ref('')
 
 const loginData = ref({
   username: '',
-  password: '',
-  rememberMe: false
+  password: ''
 })
 
-// Mantener tu animación original
 onMounted(() => {
   const observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry.isIntersecting) {
-        isVisible.value = true
-        observer.disconnect()
-      }
-    },
-    { threshold: 0.1 }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          isVisible.value = true
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 }
   )
   if (formRef.value) observer.observe(formRef.value)
 })
 
-// NUEVA FUNCIÓN DE LOGIN
 const handleLogin = async () => {
   loading.value = true
-  error.value = '' // Limpiar errores previos
+  error.value = ''
 
   try {
-    console.log('🔐 Intentando login...')
-    
-    // Usar función del IAM
-    const result = await login(loginData.value.username, loginData.value.password)
-    
-    if (result.success) {
-      console.log('✅ Login exitoso:', result.user)
-      
-      // Redirigir según tipo de usuario
-      if (result.user.type === 'laboratory') {
-        console.log('🏭 Redirigiendo laboratorio a /search')
+    const response = await login(loginData.value.username, loginData.value.password)
+
+    if (response.success && response.user) {
+      // Guardar id y token en sessionStorage
+      sessionStorage.setItem('userId', String(response.user.id))
+      sessionStorage.setItem('authToken', response.user.token)
+
+      // Redirigir al usuario
+      if (response.user.type === 'laboratory') {
         router.push('/search')
       } else {
-        console.log('👨‍⚕️ Redirigiendo paciente a /')
         router.push('/')
       }
     } else {
-      console.log('❌ Login fallido:', result.error)
-      error.value = result.error
+      error.value = 'Respuesta inválida del servidor'
     }
-    
   } catch (err) {
-    console.error('💥 Error inesperado:', err)
+    console.error('Error al iniciar sesión:', err)
     error.value = 'Error de conexión'
   } finally {
     loading.value = false
-  }
-}
-
-// FUNCIÓN DEMO (opcional - para llenar credenciales rápido)
-const fillDemoCredentials = (userType) => {
-  if (userType === 'laboratory') {
-    loginData.value.username = 'lab_demo'
-    loginData.value.password = 'demo123'
-  } else if (userType === 'patient') {
-    loginData.value.username = 'patient_demo'
-    loginData.value.password = 'demo123'
   }
 }
 </script>
@@ -157,8 +138,8 @@ const fillDemoCredentials = (userType) => {
 <style scoped>
 .login-container {
   background: var(--background-color);
-  min-height: 100vh;
-  padding: 100px 0 50px;
+
+  padding: 20px;
 }
 
 .login-form {

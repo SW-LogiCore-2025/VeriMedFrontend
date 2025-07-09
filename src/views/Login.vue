@@ -79,19 +79,21 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/services/api.js'
+import { login } from '@/iam/auth.js' // ← NUEVA IMPORTACIÓN
 
 const router = useRouter()
 const formRef = ref(null)
 const isVisible = ref(false)
 const loading = ref(false)
+const error = ref('') // ← NUEVO: para mostrar errores
 
-const rememberMe = ref(false)
 const loginData = ref({
   username: '',
-  password: ''
+  password: '',
+  rememberMe: false
 })
 
+// Mantener tu animación original
 onMounted(() => {
   const observer = new IntersectionObserver(
     ([entry]) => {
@@ -105,45 +107,49 @@ onMounted(() => {
   if (formRef.value) observer.observe(formRef.value)
 })
 
+// NUEVA FUNCIÓN DE LOGIN
 const handleLogin = async () => {
   loading.value = true
+  error.value = '' // Limpiar errores previos
 
   try {
-    const loginPayload = {
-      username: loginData.value.username,
-      password: loginData.value.password,
-      rememberMe: rememberMe.value
-    }
-
-    console.log('Login attempt:', loginPayload)
+    console.log('🔐 Intentando login...')
     
-    // Simulación de login exitoso
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Usar función del IAM
+    const result = await login(loginData.value.username, loginData.value.password)
     
-    // Aquí el backend debería retornar el tipo de usuario y si el perfil está completo
-    // Por ahora simulamos una respuesta
-    const mockResponse = {
-      userType: 'laboratory', // o 'patient'
-      profileComplete: true,
-      token: 'mock-jwt-token'
-    }
-    
-    // Redirigir según el tipo de usuario y estado del perfil
-    if (!mockResponse.profileComplete) {
-      router.push(`/complete-profile?type=${mockResponse.userType}`)
-    } else if (mockResponse.userType === 'laboratory') {
-      router.push('/search') // Dashboard de laboratorio
+    if (result.success) {
+      console.log('✅ Login exitoso:', result.user)
+      
+      // Redirigir según tipo de usuario
+      if (result.user.type === 'laboratory') {
+        console.log('🏭 Redirigiendo laboratorio a /search')
+        router.push('/search')
+      } else {
+        console.log('👨‍⚕️ Redirigiendo paciente a /')
+        router.push('/')
+      }
     } else {
-      router.push('/') // Dashboard de paciente
+      console.log('❌ Login fallido:', result.error)
+      error.value = result.error
     }
     
-    alert('Login exitoso')
-    
-  } catch (error) {
-    console.error('Error en login:', error)
-    alert('Error al iniciar sesión. Verifica tus credenciales.')
+  } catch (err) {
+    console.error('💥 Error inesperado:', err)
+    error.value = 'Error de conexión'
   } finally {
     loading.value = false
+  }
+}
+
+// FUNCIÓN DEMO (opcional - para llenar credenciales rápido)
+const fillDemoCredentials = (userType) => {
+  if (userType === 'laboratory') {
+    loginData.value.username = 'lab_demo'
+    loginData.value.password = 'demo123'
+  } else if (userType === 'patient') {
+    loginData.value.username = 'patient_demo'
+    loginData.value.password = 'demo123'
   }
 }
 </script>

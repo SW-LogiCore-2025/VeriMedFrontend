@@ -47,6 +47,27 @@
         <Column field="expirationDate" header="Expiración"></Column>
         <Column field="composition" header="Composición"></Column>
 
+        <!-- Nueva columna para el QR -->
+        <Column header="QR">
+          <template #body="slotProps">
+            <img
+                :src="'data:image/png;base64,' + slotProps.data.qrCodeBase64"
+                alt="QR Code"
+                class="qr-code-image"
+                @click="showQrPopup(slotProps.data.qrCodeBase64)"
+            />
+          </template>
+        </Column>
+
+        <Dialog v-model:visible="qrDialogVisible" :modal="true" :closable="true" :style="{ width: '300px' }">
+          <template #header>
+            <h3>Escanea el Código QR</h3>
+          </template>
+          <div class="qr-popup-content">
+            <img :src="'data:image/png;base64,' + selectedQrCode" alt="QR Code" class="qr-popup-image" />
+          </div>
+        </Dialog>
+
         <template #footer>
           <div class="table-footer">
             Total: {{ products.length }} productos
@@ -84,6 +105,8 @@ export default {
     return {
       products: [],
       addProductDialogVisible: false, // Controla la visibilidad del diálogo
+      qrDialogVisible: false,
+      selectedQrCode: "",
     };
   },
   computed: {
@@ -92,6 +115,10 @@ export default {
     },
   },
   methods: {
+    showQrPopup(qrCodeBase64) {
+      this.selectedQrCode = qrCodeBase64; // Asigna el QR seleccionado
+      this.qrDialogVisible = true; // Muestra el popup
+    },
     async fetchProducts() {
       try {
         if (!this.batchCode) {
@@ -179,6 +206,33 @@ export default {
   border: 1px solid #e2e8f0;
 }
 
+.qr-code-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.qr-code-image:hover {
+  transform: scale(1.1);
+}
+
+.qr-popup-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.qr-popup-image {
+  width: 100%;
+  height: auto;
+  max-width: 250px;
+  border-radius: 8px;
+}
 .table-footer {
   padding: 1rem 0;
   text-align: center;

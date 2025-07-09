@@ -75,7 +75,7 @@ onMounted(() => {
 const checkUserStatus = () => {
   isUserLoggedIn.value = auth.checkAuth()
   currentUser.value = auth.getUser()
-  
+
   if (isUserLoggedIn.value) {
     console.log('👤 Usuario logueado:', currentUser.value.username)
   }

@@ -24,6 +24,7 @@ import ActionBtnComponent from "@/components/ui/ActionBtnComponent.vue";
 .heroe {
   background: var(--primary-color);
   height: 100vh;
+  overflow: hidden; /* Evita el scroll */
 }
 h1 {
   color: var(--secondary-text-color);
@@ -31,7 +32,7 @@ h1 {
   font-weight: 800;
   font-size: clamp(2rem, 5vw, 4rem);
   text-align: center;
-  margin-top: 200px;
+  margin-top: 2px;
 }
 h2 {
   color: var(--secondary-text-color);

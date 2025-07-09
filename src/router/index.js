@@ -7,6 +7,9 @@ import Home from '@/views/Home.vue'
 import Search from '@/views/Search.vue'
 import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
+import ListProducts from '@/views/ListProducts.vue'
+// import Profile from '@/views/Profile.vue' // Si tienes una vista de perfil
+
 
 const routes = [
   // Rutas públicas (sin cambios)
@@ -24,7 +27,10 @@ const routes = [
     component: Register,
     beforeEnter: guestOnly  // ← AGREGADO: evita que usuarios logueados accedan
   },
-  
+  {
+    path: '/list-products',
+    component: ListProducts
+  }
   // Si tienes ruta de perfil, descomenta esta línea:
   // { path: '/profile', component: Profile, beforeEnter: requireAuth },
 ]

@@ -1,12 +1,10 @@
-<!-- 
-OPCIONAL: Si quieres mostrar info del usuario en el navbar
-Reemplaza tu NavbarLayout.vue con este código
--->
-
 <template>
   <nav class="navbar navbar-expand-lg navbar-light fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="#"><img src="https://res.cloudinary.com/drkelnilg/image/upload/v1752046529/imagen_2025-07-09_023451036-removebg-preview_eaavmj.png" alt="logo" style="min-width: 100px; max-width: 120px"></a>
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="https://res.cloudinary.com/drkelnilg/image/upload/v1752046529/imagen_2025-07-09_023451036-removebg-preview_eaavmj.png" alt="logo" style="min-width: 100px; max-width: 120px">
+        <span class="navbar-title ms-2">VeriMed</span>
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
               data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
               aria-label="Toggle navigation">
@@ -15,12 +13,12 @@ Reemplaza tu NavbarLayout.vue con este código
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <router-link class="nav-link mx-3" to="/">Home</router-link>
+            <router-link class="nav-link mx-3" to="/">Inicio</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link mx-3" to="/search">Search</router-link>
+            <router-link class="nav-link mx-3" to="/search">Gestion</router-link>
           </li>
-          
+
           <!-- Si NO está logueado -->
           <template v-if="!isUserLoggedIn">
             <li class="nav-item">
@@ -30,7 +28,7 @@ Reemplaza tu NavbarLayout.vue con este código
               <router-link class="nav-link mx-3 register-btn" to="/register">Registrarse</router-link>
             </li>
           </template>
-          
+
           <!-- Si SÍ está logueado -->
           <template v-else>
             <li class="nav-item">
@@ -100,7 +98,12 @@ router.afterEach(() => {
 
 <style scoped>
 /* Mantén todos tus estilos existentes y agrega estos: */
-
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--secondary-text-color);
+  font-family: 'Funnel Sans', sans-serif;
+}
 .navbar {
   background-color: var(--primary-color, #ffffff);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);

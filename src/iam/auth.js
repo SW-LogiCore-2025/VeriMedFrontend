@@ -1,68 +1,103 @@
-// src/iam/auth.js
+// src/iam/auth.js - ACTUALIZADO para backend real
 import { storage } from './storage.js'
 
 class SimpleAuth {
   constructor() {
     this.currentUser = storage.getUser()
     this.isLoggedIn = !!this.currentUser
+    this.baseURL = 'http://localhost:8080/api/v1/authentication' // Ajusta el puerto según tu backend
   }
 
-  // Login simple
+  // Login con endpoint real
   async login(username, password) {
     try {
-      // Por ahora simular - luego conectar a tu API
-      console.log('Login attempt:', username, password)
+      console.log('🔐 Intentando login con backend...')
       
-      // Simular respuesta del servidor
-      let userData
-      if (username === 'lab_demo' && password === 'demo123') {
-        userData = { 
-          username: 'lab_demo', 
-          type: 'laboratory', 
-          name: 'Laboratorio Demo',
-          email: 'lab@demo.com'
-        }
-      } else if (username === 'patient_demo' && password === 'demo123') {
-        userData = { 
-          username: 'patient_demo', 
-          type: 'patient', 
-          name: 'Paciente Demo',
-          email: 'patient@demo.com'
-        }
-      } else {
-        throw new Error('Credenciales incorrectas')
+      const response = await fetch(`${this.baseURL}/sign-in`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Credenciales incorrectas')
+      }
+
+      const data = await response.json()
+      console.log('✅ Respuesta del backend:', data)
+      
+      // Extraer datos del usuario según respuesta del backend
+      const userData = {
+        username: data.username || username,
+        type: data.role || data.userType || 'patient', // Ajustar según tu backend
+        name: data.name || data.fullName || username,
+        email: data.email || '',
+        id: data.id || data.userId
       }
       
-      // Guardar usuario
+      // Guardar usuario y token
       this.currentUser = userData
       this.isLoggedIn = true
       storage.setUser(userData)
-      storage.setToken('demo-token-123')
+      storage.setToken(data.token || data.accessToken)
       
       return { success: true, user: userData }
       
     } catch (error) {
+      console.error('❌ Error en login:', error)
       return { success: false, error: error.message }
     }
   }
 
-  // Registro simple
+  // Registro con endpoint real  
   async register(userData) {
     try {
-      console.log('Register attempt:', userData)
+      console.log('📝 Registrando usuario con backend...', userData)
       
-      // Simular registro exitoso
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch(`${this.baseURL}/sign-up`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          password: userData.password,
+          email: userData.email,
+          // Agregar campos según lo que espere tu backend
+          userType: userData.userType || 'laboratory', // Por defecto laboratorio
+          role: userData.role || userData.userType || 'laboratory'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Error al crear cuenta')
+      }
+
+      const data = await response.json()
+      console.log('✅ Usuario registrado:', data)
       
-      return { success: true, message: 'Cuenta creada exitosamente' }
+      return { 
+        success: true, 
+        message: 'Cuenta creada exitosamente',
+        data: data
+      }
       
     } catch (error) {
+      console.error('❌ Error en registro:', error)
       return { success: false, error: error.message }
     }
   }
 
   // Logout simple
   logout() {
+    console.log('🚪 Cerrando sesión...')
     this.currentUser = null
     this.isLoggedIn = false
     storage.clear()
@@ -80,26 +115,28 @@ class SimpleAuth {
 
   // Verificar si es laboratorio
   isLaboratory() {
-    return this.currentUser?.type === 'laboratory'
+    return this.currentUser?.type === 'laboratory' || this.currentUser?.role === 'laboratory'
   }
 
   // Verificar si es paciente
   isPatient() {
-    return this.currentUser?.type === 'patient'
+    return this.currentUser?.type === 'patient' || this.currentUser?.role === 'patient'
   }
 
   // Actualizar perfil (para futuro)
   async updateProfile(profileData) {
     try {
-      console.log('Update profile:', profileData)
+      console.log('📝 Actualizando perfil:', profileData)
       
-      // Simular actualización
-      this.currentUser = { ...this.currentUser, ...profileData }
+      // Por ahora solo actualizar localmente
+      // Aquí puedes agregar llamada al backend para actualizar perfil
+      this.currentUser = { ...this.currentUser, ...profileData, profileComplete: true }
       storage.setUser(this.currentUser)
       
       return { success: true, user: this.currentUser }
       
     } catch (error) {
+      console.error('❌ Error actualizando perfil:', error)
       return { success: false, error: error.message }
     }
   }
@@ -108,7 +145,7 @@ class SimpleAuth {
 // Crear instancia global
 export const auth = new SimpleAuth()
 
-// Funciones de conveniencia para usar en componentes
+// Funciones de conveniencia
 export const login = (username, password) => auth.login(username, password)
 export const register = (userData) => auth.register(userData)
 export const logout = () => auth.logout()

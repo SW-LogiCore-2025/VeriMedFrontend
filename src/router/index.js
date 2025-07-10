@@ -32,12 +32,12 @@ const routes = [
   { 
     path: '/home', 
     component: Home,
-    beforeEnter: requireAuth
+    //beforeEnter: requireAuth
   },
   { 
     path: '/search', 
     component: Search,
-    beforeEnter: requireAuth
+    //beforeEnter: requireAuth
   },
   {
     path: '/list-products',

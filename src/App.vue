@@ -13,18 +13,31 @@
     <RouterView />
   </main>
   
-  
   <Toast />
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import NavbarLayout from "@/components/layout/NavbarLayout.vue"
+import { useAuthStore } from '@/iam/auth.js'
+
+const authStore = useAuthStore()
+
+// SINCRONIZAR ESTADO AL CARGAR LA APLICACIÓN
+onMounted(() => {
+  console.log('🚀 App montado - Sincronizando estado de autenticación...')
+  authStore.syncWithAuth()
+  
+  // Debug: mostrar estado actual
+  console.log('📊 Estado después de sincronizar:', {
+    isLoggedIn: authStore.isLoggedIn,
+    user: authStore.user
+  })
+})
 </script>
 
 <style>
-
 :root {
- 
   --primary-color: #203459;
   --primary-dark: #0a1529;
   --primary-light: #3e4564;
@@ -32,18 +45,15 @@ import NavbarLayout from "@/components/layout/NavbarLayout.vue"
   --secondary-light: #a4bdec;
   --accent-color: #4f46e5;
   
-  
   --bg-primary: #e6ecf8;
   --bg-secondary: #f8fafc;
   --bg-card: #ffffff;
   
- 
   --text-primary: #142443;
   --text-secondary: #64748b;
   --text-light: #d1ddf3;
   --text-white: #ffffff;
   
- 
   --border-color: #e2e8f0;
   --border-radius: 12px;
   --border-radius-lg: 16px;
@@ -51,14 +61,12 @@ import NavbarLayout from "@/components/layout/NavbarLayout.vue"
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   
-  
   --navbar-height: 80px;
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  
   
   --transition: all 0.3s ease;
   --transition-fast: all 0.15s ease;
@@ -70,7 +78,6 @@ import NavbarLayout from "@/components/layout/NavbarLayout.vue"
   box-sizing: border-box;
 }
 
-
 body {
   font-family: 'Albert Sans', sans-serif;
   background-color: var(--bg-primary);
@@ -78,7 +85,6 @@ body {
   line-height: 1.6;
   padding-top: var(--navbar-height);
 }
-
 
 .navbar {
   position: fixed;
@@ -91,22 +97,18 @@ body {
   z-index: 1000;
 }
 
-
 .main-content {
   min-height: calc(100vh - var(--navbar-height));
   padding: 0;
 }
 
-
 .text-primary { color: var(--text-primary) !important; }
 .text-secondary { color: var(--text-secondary) !important; }
 .text-white { color: var(--text-white) !important; }
 
-
 .bg-primary { background-color: var(--bg-primary) !important; }
 .bg-secondary { background-color: var(--bg-secondary) !important; }
 .bg-card { background-color: var(--bg-card) !important; }
-
 
 .p-0 { padding: 0 !important; }
 .p-1 { padding: var(--spacing-xs) !important; }
@@ -124,7 +126,6 @@ body {
 .mb-3 { margin-bottom: var(--spacing-md) !important; }
 .mb-4 { margin-bottom: var(--spacing-lg) !important; }
 
-
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
@@ -134,13 +135,11 @@ body {
 .w-full { width: 100%; }
 .h-full { height: 100%; }
 
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-sm);
 }
-
 
 :root {
   --p-primary-color: var(--primary-color);
@@ -149,7 +148,6 @@ body {
   --p-surface-50: var(--bg-secondary);
   --p-surface-100: var(--bg-primary);
 }
-
 
 .p-button {
   font-family: 'Albert Sans', sans-serif;
@@ -176,7 +174,6 @@ body {
   border: none;
 }
 
-
 @media (max-width: 768px) {
   .container {
     padding: 0 var(--spacing-xs);
@@ -186,7 +183,6 @@ body {
     --navbar-height: 70px;
   }
 }
-
 
 ::-webkit-scrollbar {
   width: 8px;

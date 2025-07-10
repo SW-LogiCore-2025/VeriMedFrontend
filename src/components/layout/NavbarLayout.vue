@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/iam/auth.js'
 import { useToast } from 'primevue/usetoast'
@@ -98,6 +98,27 @@ const route = useRoute()
 const authStore = useAuthStore()
 const toast = useToast()
 const userMenu = ref()
+
+// SINCRONIZAR ESTADO AL MONTAR EL COMPONENTE
+onMounted(() => {
+  console.log('🔄 Navbar montado - Sincronizando estado de auth...')
+  authStore.syncWithAuth()
+  console.log('📊 Estado actual:', {
+    isLoggedIn: authStore.isLoggedIn,
+    user: authStore.user
+  })
+})
+
+// OBSERVAR CAMBIOS EN LA RUTA PARA RE-SINCRONIZAR
+watch(() => route.path, () => {
+  console.log('🔄 Cambio de ruta - Re-sincronizando auth...')
+  authStore.syncWithAuth()
+}, { immediate: true })
+
+// OBSERVAR CAMBIOS EN EL ESTADO DE AUTH
+watch(() => authStore.isLoggedIn, (newValue) => {
+  console.log('🔄 Estado de login cambió:', newValue)
+}, { immediate: true })
 
 // Detectar si estamos en página de autenticación
 const isAuthPage = computed(() => {
@@ -144,6 +165,7 @@ const toggleUserMenu = (event) => {
 
 // Manejar logout
 function handleLogout() {
+  console.log('🚪 Cerrando sesión...')
   authStore.logout()
   
   toast.add({

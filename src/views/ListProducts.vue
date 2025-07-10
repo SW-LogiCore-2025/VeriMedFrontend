@@ -104,20 +104,20 @@ export default {
   data() {
     return {
       products: [],
-      addProductDialogVisible: false, // Controla la visibilidad del diálogo
+      addProductDialogVisible: false,
       qrDialogVisible: false,
       selectedQrCode: "",
     };
   },
   computed: {
     batchCode() {
-      return this.$route.query.code; // Obtiene el batchCode desde la URL
+      return this.$route.query.code;
     },
   },
   methods: {
     showQrPopup(qrCodeBase64) {
-      this.selectedQrCode = qrCodeBase64; // Asigna el QR seleccionado
-      this.qrDialogVisible = true; // Muestra el popup
+      this.selectedQrCode = qrCodeBase64;
+      this.qrDialogVisible = true;
     },
     async fetchProducts() {
       try {
@@ -131,7 +131,7 @@ export default {
       }
     },
     openAddProductDialog() {
-      this.addProductDialogVisible = true; // Abre el diálogo
+      this.addProductDialogVisible = true;
     },
   },
   mounted() {
@@ -233,51 +233,13 @@ export default {
   max-width: 250px;
   border-radius: 8px;
 }
+
 .table-footer {
   padding: 1rem 0;
   text-align: center;
   color: #64748b;
   font-size: 0.9rem;
   border-top: 1px solid #e2e8f0;
-}
-
-/* Estilos globales para DataTable */
-:deep(.p-datatable) {
-  border: none;
-}
-
-:deep(.p-datatable-header) {
-  background: transparent;
-  border: none;
-  padding: 0;
-}
-
-:deep(.p-datatable-thead > tr > th) {
-  background: #f8fafc;
-  color: #374151;
-  font-weight: 500;
-  font-size: 0.875rem;
-  padding: 1rem;
-  border: none;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-:deep(.p-datatable-tbody > tr > td) {
-  padding: 1rem;
-  border: none;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-:deep(.p-datatable-tbody > tr:hover) {
-  background: #f8fafc;
-}
-
-:deep(.p-datatable-striped .p-datatable-tbody > tr:nth-child(even)) {
-  background: #f9fafb;
-}
-
-:deep(.p-datatable-striped .p-datatable-tbody > tr:nth-child(even):hover) {
-  background: #f1f5f9;
 }
 
 .add-btn {
@@ -292,6 +254,70 @@ export default {
   transition: background-color 0.3s ease;
 }
 
+/* SOLUCIÓN ESPECÍFICA PARA TEMA OSCURO */
+/* Forzar colores claros solo en elementos necesarios, manteniendo el layout */
+
+:deep(.p-datatable) {
+  border: none;
+  background: transparent;
+}
+
+:deep(.p-datatable-header) {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Header de columnas - forzar color claro */
+:deep(.p-datatable-thead > tr > th) {
+  background: #f8fafc !important;
+  color: #374151 !important;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 1rem;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Cuerpo de la tabla - forzar fondo blanco */
+:deep(.p-datatable-tbody > tr > td) {
+  padding: 1rem;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  background: white !important;
+  color: #374151 !important;
+}
+
+/* Filas striped - mantener patrón claro */
+:deep(.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) > td) {
+  background: #f9fafb !important;
+}
+
+/* Hover states - color claro uniforme */
+:deep(.p-datatable-tbody > tr:hover > td) {
+  background: #f1f5f9 !important;
+  color: #374151 !important;
+}
+
+:deep(.p-datatable-striped .p-datatable-tbody > tr:nth-child(even):hover > td) {
+  background: #f1f5f9 !important;
+  color: #374151 !important;
+}
+
+/* Footer de tabla - fondo claro */
+:deep(.p-datatable-footer) {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Mensaje de tabla vacía - si no hay datos */
+:deep(.p-datatable-emptymessage > td) {
+  background: white !important;
+  color: #64748b !important;
+  text-align: center;
+  padding: 3rem 1rem;
+}
 
 /* Responsive */
 @media (max-width: 768px) {

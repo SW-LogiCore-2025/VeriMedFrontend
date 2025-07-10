@@ -5,147 +5,159 @@
       header="Agregar Producto al Lote"
       :modal="true"
       :closable="true"
-      :style="{ width: '40vw', borderRadius: '15px' }"
+      :style="{ width: '40vw', borderRadius: '15px', overflow: 'hidden' }"
       class="add-product-dialog"
+      :showHeader="false"
+      :contentStyle="{ padding: '0', boxShadow: 'none', border: 'none' }"
   >
     <div class="add-product-content">
-      <h2 class="dialog-title">Agregar Producto</h2>
-      <form @submit.prevent="handleAddProduct">
-        <div class="row">
-          <!-- Tipo de Producto -->
-          <div class="col-md-6 mb-3">
-            <label for="productTypeId" class="form-label">Tipo de Producto</label>
-            <select
-                v-model="productData.productTypeId"
-                id="productTypeId"
-                class="form-control"
-                required
-            >
-              <option value="" disabled>Seleccione un tipo de producto</option>
-              <option v-for="type in productTypes" :key="type.id" :value="type.id">
-                {{ type.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Cantidad -->
-          <div class="col-md-6 mb-3">
-            <label for="quantity" class="form-label">Cantidad</label>
-            <input
-                v-model.number="productData.quantity"
-                type="number"
-                id="quantity"
-                class="form-control"
-                placeholder="Ingrese la cantidad"
-                required
-            />
-          </div>
+      <!-- Encabezado -->
+      <div class="dialog-header">
+        <h2 class="dialog-title">Agregar Producto al Lote</h2>
+        <button @click="closeDialog" class="close-btn">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      
+      <!-- Formulario -->
+      <form @submit.prevent="handleAddProduct" class="product-form">
+        <div class="form-group">
+          <label for="productTypeId" class="form-label">
+            <i class="pi pi-box"></i> Tipo de Producto
+          </label>
+          <select
+              v-model="productData.productTypeId"
+              id="productTypeId"
+              class="form-control"
+              required
+          >
+            <option value="" disabled>Seleccione un tipo de producto</option>
+            <option v-for="type in productTypes" :key="type.id" :value="type.id">
+              {{ type.name }}
+            </option>
+          </select>
         </div>
 
-        <div class="row">
-          <!-- Nombre -->
-          <div class="col-md-6 mb-3">
-            <label for="name" class="form-label">Nombre</label>
-            <input
-                v-model="productData.name"
-                type="text"
-                id="name"
-                class="form-control"
-                placeholder="Nombre del producto"
-                required
-            />
-          </div>
-
-          <!-- Descripción -->
-          <div class="col-md-6 mb-3">
-            <label for="description" class="form-label">Descripción</label>
-            <textarea
-                v-model="productData.description"
-                id="description"
-                class="form-control"
-                placeholder="Descripción del producto"
-                rows="3"
-                required
-            ></textarea>
-          </div>
+        <div class="form-group">
+          <label for="quantity" class="form-label">
+            <i class="pi pi-hashtag"></i> Cantidad
+          </label>
+          <input
+              v-model.number="productData.quantity"
+              type="number"
+              id="quantity"
+              class="form-control"
+              placeholder="Ingrese la cantidad"
+              required
+          />
         </div>
 
-        <div class="row">
-          <!-- Imagen -->
-          <div class="col-md-6 mb-3">
-            <label for="image" class="form-label">Imagen del Producto</label>
-            <input
-                type="file"
-                id="imageFile"
-                class="form-control"
-                @change="handleImageUpload"
-            />
-            <span class="or-text">o</span>
-            <input
-                v-model="productData.image"
-                type="text"
-                id="imageUrl"
-                class="form-control"
-                placeholder="URL de la imagen"
-            />
-          </div>
-
-          <!-- Fecha de Fabricación -->
-          <div class="col-md-6 mb-3">
-            <label for="manufactureDate" class="form-label">Fecha de Fabricación</label>
-            <input
-                v-model="productData.manufactureDate"
-                type="date"
-                id="manufactureDate"
-                class="form-control"
-                required
-            />
-          </div>
+        <div class="form-group">
+          <label for="name" class="form-label">
+            <i class="pi pi-tag"></i> Nombre
+          </label>
+          <input
+              v-model="productData.name"
+              type="text"
+              id="name"
+              class="form-control"
+              placeholder="Nombre del producto"
+              required
+          />
         </div>
 
-        <div class="row">
-          <!-- Fecha de Expiración -->
-          <div class="col-md-6 mb-3">
-            <label for="expirationDate" class="form-label">Fecha de Expiración</label>
-            <input
-                v-model="productData.expirationDate"
-                type="date"
-                id="expirationDate"
-                class="form-control"
-                required
-            />
-          </div>
+        <div class="form-group">
+          <label for="description" class="form-label">
+            <i class="pi pi-align-left"></i> Descripción
+          </label>
+          <textarea
+              v-model="productData.description"
+              id="description"
+              class="form-control"
+              placeholder="Descripción del producto"
+              rows="3"
+              required
+          ></textarea>
+        </div>
 
-          <!-- Composición -->
-          <div class="col-md-6 mb-3">
-            <label for="composition" class="form-label">Composición</label>
-            <textarea
-                v-model="productData.composition"
-                id="composition"
-                class="form-control"
-                placeholder="Composición del producto"
-                rows="2"
-                required
-            ></textarea>
-          </div>
+        <div class="form-group">
+          <label for="image" class="form-label">
+            <i class="pi pi-image"></i> Imagen del Producto
+          </label>
+          <input
+              type="file"
+              id="imageFile"
+              class="form-control"
+              @change="handleImageUpload"
+          />
+          <span class="or-text">o</span>
+          <input
+              v-model="productData.image"
+              type="text"
+              id="imageUrl"
+              class="form-control"
+              placeholder="URL de la imagen"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="manufactureDate" class="form-label">
+            <i class="pi pi-calendar"></i> Fecha de Fabricación
+          </label>
+          <input
+              v-model="productData.manufactureDate"
+              type="date"
+              id="manufactureDate"
+              class="form-control"
+              required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="expirationDate" class="form-label">
+            <i class="pi pi-calendar-times"></i> Fecha de Expiración
+          </label>
+          <input
+              v-model="productData.expirationDate"
+              type="date"
+              id="expirationDate"
+              class="form-control"
+              required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="composition" class="form-label">
+            <i class="pi pi-list"></i> Composición
+          </label>
+          <textarea
+              v-model="productData.composition"
+              id="composition"
+              class="form-control"
+              placeholder="Composición del producto"
+              rows="2"
+              required
+          ></textarea>
         </div>
 
         <!-- Botones -->
-        <div class="dialog-footer">
+        <div class="form-actions">
           <button
               type="button"
-              class="btn btn-secondary"
+              class="btn-cancel"
               @click="closeDialog"
           >
+            <i class="pi pi-times"></i>
             Cancelar
           </button>
           <button
               type="submit"
-              class="btn btn-primary"
+              class="btn-create"
               :disabled="loading"
           >
+            <i class="pi pi-check"></i>
             <span v-if="loading">Agregando...</span>
-            <span v-else>Agregar Producto</span>
+            <span v-else>Agregar</span>
           </button>
         </div>
       </form>
@@ -203,7 +215,7 @@ export default {
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          productData.value.image = reader.result; // Base64 de la imagen
+          productData.value.image = reader.result;
         };
         reader.readAsDataURL(file);
       }
@@ -241,92 +253,157 @@ export default {
 </script>
 
 <style scoped>
-.add-product-content {
-  background: var(--primary-color);
-  padding: 40px;
-  border-radius: 20px;
-  color: var(--secondary-text-color);
-  font-family: 'Funnel Sans', sans-serif;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+.add-product-dialog {
+  overflow: hidden;
 }
-.or-text {
-  display: block;
-  text-align: center;
-  margin: 0.5rem 0;
-  font-size: 0.875rem;
-  color: #6b7280;
+
+.add-product-content {
+  background: #203459;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.dialog-header {
+  background: #203459;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .dialog-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: 20px;
-  text-align: center;
-  color: var(--secondary-text-color);
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  opacity: 1;
+}
+
+.product-form {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-control {
-  background: transparent;
-  border: 1px solid var(--background-color);
-  border-radius: 15px;
-  padding: 15px 20px;
-  color: var(--secondary-text-color);
-  font-size: 1rem;
-  margin-bottom: 10px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: white;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
 .form-control::placeholder {
-  color: var(--tertiary-text-color);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .form-control:focus {
-  background: transparent;
-  border-color: var(--secondary-color);
-  color: var(--secondary-text-color);
-  box-shadow: none;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
   outline: none;
 }
 
-.dialog-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+.or-text {
+  display: block;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0.5rem 0;
+  font-size: 0.8rem;
 }
 
-.btn-primary {
-  background-color: var(--secondary-color);
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-cancel, 
+.btn-create {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  height: 48px;
+  transition: background-color 0.2s;
   border: none;
-  border-radius: 25px;
-  padding: 15px 30px;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
+}
+
+.btn-cancel {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--secondary-hover-color);
-  transform: translateY(-2px);
+.btn-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.btn-primary:disabled {
-  opacity: 0.6;
+.btn-create {
+  background-color: #5E72E4;
+  color: white;
+}
+
+.btn-create:hover:not(:disabled) {
+  background-color: #4c61d7;
+}
+
+.btn-create:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
-.btn-secondary {
-  background-color: var(--tertiary-text-color);
-  border: none;
-  border-radius: 25px;
-  padding: 15px 30px;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: var(--secondary-hover-color);
-  transform: translateY(-2px);
+/* Responsive */
+@media (max-width: 768px) {
+  .add-product-content {
+    max-width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-cancel, 
+  .btn-create {
+    width: 100%;
+  }
 }
 </style>

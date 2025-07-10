@@ -42,7 +42,7 @@ const routes = [
   {
     path: '/list-products',
     component: ListProducts,
-    beforeEnter: requireAuth
+    //beforeEnter: requireAuth
   }
 ]
 

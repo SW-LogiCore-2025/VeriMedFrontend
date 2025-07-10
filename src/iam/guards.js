@@ -1,4 +1,4 @@
-// src/iam/guards.js
+// src/iam/guards.js - CORREGIDO
 import { auth } from './auth.js'
 
 // Guard simple para rutas que requieren login
@@ -10,7 +10,7 @@ export const requireAuth = (to, from, next) => {
     next() // Usuario logueado, continuar
   } else {
     console.log('❌ Usuario no autenticado, redirigiendo a login')
-    next('/login') // No logueado, ir a login
+    next('/login') // CAMBIO: Redirigir a /login en lugar de /login
   }
 }
 
@@ -23,13 +23,13 @@ export const guestOnly = (to, from, next) => {
     next() // No logueado, continuar
   } else {
     console.log('⚠️ Usuario ya logueado, redirigiendo...')
-    // Logueado, redirigir según tipo
+    // CAMBIO: Logueado, redirigir según tipo pero a las nuevas rutas
     if (auth.isLaboratory()) {
       console.log('🏭 Redirigiendo laboratorio a /search')
       next('/search') // Laboratorio va a búsqueda/gestión
     } else {
-      console.log('👨‍⚕️ Redirigiendo paciente a /')
-      next('/') // Paciente va al home
+      console.log('👨‍⚕️ Redirigiendo paciente a /home')
+      next('/home') // CAMBIO: Paciente va a /home en lugar de /
     }
   }
 }
@@ -43,7 +43,7 @@ export const laboratoryOnly = (to, from, next) => {
     next() // Es laboratorio, continuar
   } else if (auth.checkAuth()) {
     console.log('❌ No es laboratorio, redirigiendo a home')
-    next('/') // Logueado pero no es laboratorio
+    next('/home') // CAMBIO: Logueado pero no es laboratorio, va a /home
   } else {
     console.log('❌ No logueado, redirigiendo a login')
     next('/login') // No logueado

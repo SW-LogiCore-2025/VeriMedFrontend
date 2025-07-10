@@ -12,6 +12,11 @@
               <p class="subtitle">Accede a tu cuenta VeriMed</p>
             </div>
 
+            <!-- CAMBIO: Mostrar errores si los hay -->
+            <div v-if="error" class="alert alert-danger mb-3">
+              {{ error }}
+            </div>
+
             <form @submit.prevent="handleLogin">
               <!-- Email/Username -->
               <div class="mb-3">
@@ -86,6 +91,7 @@ const formRef = ref(null)
 const isVisible = ref(false)
 const loading = ref(false)
 const error = ref('')
+const rememberMe = ref(false) // CAMBIO: Agregar variable faltante
 
 const loginData = ref({
   username: '',
@@ -113,22 +119,30 @@ const handleLogin = async () => {
     const response = await login(loginData.value.username, loginData.value.password)
 
     if (response.success && response.user) {
-      // Guardar id y token en sessionStorage
+      // CAMBIO: Mejorar el manejo del localStorage
+      if (rememberMe.value) {
+        // Solo guardar en localStorage si "recordarme" está marcado
+        localStorage.setItem('verimed_user', JSON.stringify(response.user))
+      }
+      
+      // CAMBIO: Siempre guardar en sessionStorage para la sesión actual
       sessionStorage.setItem('userId', String(response.user.id))
       sessionStorage.setItem('authToken', response.user.token)
 
-      // Redirigir al usuario
-      if (response.user.type === 'laboratory') {
+      // CAMBIO: Redirecciones corregidas según el tipo de usuario
+      if (response.user.type === 'laboratory' || response.user.role === 'laboratory') {
+        console.log('🏭 Redirigiendo laboratorio a /search')
         router.push('/search')
       } else {
-        router.push('/')
+        console.log('👨‍⚕️ Redirigiendo paciente/usuario a /home')
+        router.push('/home')
       }
     } else {
-      error.value = 'Respuesta inválida del servidor'
+      error.value = response.error || 'Respuesta inválida del servidor'
     }
   } catch (err) {
     console.error('Error al iniciar sesión:', err)
-    error.value = 'Error de conexión'
+    error.value = 'Error de conexión. Intenta nuevamente.'
   } finally {
     loading.value = false
   }
@@ -138,8 +152,10 @@ const handleLogin = async () => {
 <style scoped>
 .login-container {
   background: var(--background-color);
-
   padding: 20px;
+  min-height: 100vh; /* CAMBIO: Asegurar altura completa */
+  display: flex;
+  align-items: center;
 }
 
 .login-form {
@@ -173,6 +189,20 @@ h1 {
   font-size: 1.1rem;
   font-weight: 300;
   margin-bottom: 30px;
+}
+
+/* CAMBIO: Estilo para errores */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: 'Albert Sans', sans-serif;
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #dc3545;
 }
 
 .form-control {
@@ -288,14 +318,6 @@ label {
   
   h1 {
     font-size: 2rem;
-  }
-  
-  .user-type-card {
-    padding: 15px;
-  }
-  
-  .card-icon {
-    font-size: 1.5rem;
   }
 }
 </style>

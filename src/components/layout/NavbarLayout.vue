@@ -12,15 +12,19 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <router-link class="nav-link mx-3" to="/">Inicio</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link mx-3" to="/search">Gestion</router-link>
-          </li>
+          
+          <!-- CAMBIO 2: Solo mostrar Inicio y Gestión si NO estás en login/register -->
+          <template v-if="!isAuthPage">
+            <li class="nav-item">
+              <router-link class="nav-link mx-3" to="/home">Inicio</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mx-3" to="/search">Gestión</router-link>
+            </li>
+          </template>
 
-          <!-- Si NO está logueado -->
-          <template v-if="!isUserLoggedIn">
+          <!-- Si NO está logueado Y NO está en página de auth -->
+          <template v-if="!isUserLoggedIn && !isAuthPage">
             <li class="nav-item">
               <router-link class="nav-link mx-3" to="/login">Iniciar Sesión</router-link>
             </li>
@@ -29,8 +33,18 @@
             </li>
           </template>
 
+          <!-- Si NO está logueado Y SÍ está en página de auth -->
+          <template v-if="!isUserLoggedIn && isAuthPage">
+            <li class="nav-item" v-if="$route.path === '/login'">
+              <router-link class="nav-link mx-3 register-btn" to="/register">Registrarse</router-link>
+            </li>
+            <li class="nav-item" v-if="$route.path === '/register'">
+              <router-link class="nav-link mx-3" to="/login">Iniciar Sesión</router-link>
+            </li>
+          </template>
+
           <!-- Si SÍ está logueado -->
-          <template v-else>
+          <template v-if="isUserLoggedIn">
             <li class="nav-item">
               <span class="nav-link mx-3 user-info">
                 <i :class="userIcon"></i>
@@ -55,12 +69,18 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { auth, logout } from '@/iam/auth.js'
 
 const router = useRouter()
+const route = useRoute()
 const isUserLoggedIn = ref(false)
 const currentUser = ref(null)
+
+// CAMBIO 3: Computed para detectar si estamos en página de autenticación
+const isAuthPage = computed(() => {
+  return route.path === '/login' || route.path === '/register'
+})
 
 // Computed para el icono del usuario
 const userIcon = computed(() => {
@@ -86,7 +106,7 @@ const handleLogout = () => {
   logout()
   isUserLoggedIn.value = false
   currentUser.value = null
-  router.push('/')
+  router.push('/login') // CAMBIO 4: Redirigir a login en lugar de home
   console.log('✅ Sesión cerrada')
 }
 
@@ -97,7 +117,6 @@ router.afterEach(() => {
 </script>
 
 <style scoped>
-/* Mantén todos tus estilos existentes y agrega estos: */
 .navbar-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -108,14 +127,14 @@ router.afterEach(() => {
   background-color: var(--primary-color, #ffffff);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 1030;
-  min-height: var(--navbar-height); /* Mantener la altura del toolbar */
+  min-height: var(--navbar-height);
 }
 
 .navbar-brand img {
-  max-height: 70px; /* Limita la altura máxima de la imagen */
-  object-fit: contain; /* Asegura que la imagen mantenga sus proporciones */
-  height: auto; /* Ajusta automáticamente la altura */
-  width: auto; /* Ajusta automáticamente el ancho */
+  max-height: 70px;
+  object-fit: contain;
+  height: auto;
+  width: auto;
 }
 
 .nav-link {
@@ -169,7 +188,6 @@ router.afterEach(() => {
   transform: translateY(-2px);
 }
 
-/* Nuevos estilos para usuario logueado */
 .user-info {
   color: var(--secondary-color) !important;
   font-weight: 600;

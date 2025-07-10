@@ -1,38 +1,49 @@
-// src/router/index.js
+// src/router/index.js - CORREGIDO
 import { createRouter, createWebHistory } from 'vue-router'
-import { guestOnly, requireAuth } from '@/iam/guards.js' // ← LÍNEA NUEVA
+import { guestOnly, requireAuth } from '@/iam/guards.js'
 
-// Tus imports existentes
+// Imports de componentes
 import Home from '@/views/Home.vue'
 import Search from '@/views/Search.vue'
 import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import ListProducts from '@/views/ListProducts.vue'
-// import Profile from '@/views/Profile.vue' // Si tienes una vista de perfil
-
 
 const routes = [
-  // Rutas públicas (sin cambios)
-  { path: '/', component: Home },
-  { path: '/search', component: Search },
+  // CAMBIO 1: Redirigir root a login
+  { 
+    path: '/', 
+    redirect: '/login' 
+  },
   
-  // Rutas de autenticación - solo para usuarios NO logueados
+  // Páginas de autenticación - solo para usuarios NO logueados
   { 
     path: '/login', 
     component: Login,
-    beforeEnter: guestOnly  // ← AGREGADO: evita que usuarios logueados accedan
+    beforeEnter: guestOnly
   },
   { 
     path: '/register', 
     component: Register,
-    beforeEnter: guestOnly  // ← AGREGADO: evita que usuarios logueados accedan
+    beforeEnter: guestOnly
+  },
+  
+  // Páginas principales - requieren autenticación
+  { 
+    path: '/home', 
+    component: Home,
+    beforeEnter: requireAuth
+  },
+  { 
+    path: '/search', 
+    component: Search,
+    beforeEnter: requireAuth
   },
   {
     path: '/list-products',
-    component: ListProducts
+    component: ListProducts,
+    beforeEnter: requireAuth
   }
-  // Si tienes ruta de perfil, descomenta esta línea:
-  // { path: '/profile', component: Profile, beforeEnter: requireAuth },
 ]
 
 const router = createRouter({

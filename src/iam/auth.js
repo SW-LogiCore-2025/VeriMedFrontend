@@ -1,11 +1,11 @@
-// src/iam/auth.js - ACTUALIZADO para backend real
+// src/iam/auth.js - ACTUALIZADO con redirecciones corregidas
 import { storage } from './storage.js'
 
 class SimpleAuth {
   constructor() {
     this.currentUser = storage.getUser()
     this.isLoggedIn = !!this.currentUser
-    this.baseURL = `${import.meta.env.VITE_BACKEND_URL}api/v1/authentication` // Construir la URL completa
+    this.baseURL = `${import.meta.env.VITE_BACKEND_URL}api/v1/authentication`
   }
 
   // Login con endpoint real
@@ -35,17 +35,18 @@ class SimpleAuth {
       // Extraer datos del usuario según respuesta del backend
       const userData = {
         username: data.username || username,
-        type: data.role || data.userType || 'patient', // Ajustar según tu backend
+        type: data.role || data.userType || 'patient',
         name: data.name || data.fullName || username,
         email: data.email || '',
-        id: data.id || data.userId
+        id: data.id || data.userId,
+        token: data.token || data.accessToken // CAMBIO: Guardar token en userData
       }
       
       // Guardar usuario y token
       this.currentUser = userData
       this.isLoggedIn = true
       storage.setUser(userData)
-      storage.setToken(data.token || data.accessToken)
+      storage.setToken(userData.token)
       
       return { success: true, user: userData }
       
@@ -69,8 +70,7 @@ class SimpleAuth {
           username: userData.username,
           password: userData.password,
           email: userData.email,
-          // Agregar campos según lo que espere tu backend
-          userType: userData.userType || 'laboratory', // Por defecto laboratorio
+          userType: userData.userType || 'laboratory',
           role: userData.role || userData.userType || 'laboratory'
         })
       })
@@ -123,13 +123,16 @@ class SimpleAuth {
     return this.currentUser?.type === 'patient' || this.currentUser?.role === 'patient'
   }
 
+  // CAMBIO: Obtener token directamente
+  getToken() {
+    return this.currentUser?.token || storage.getToken()
+  }
+
   // Actualizar perfil (para futuro)
   async updateProfile(profileData) {
     try {
       console.log('📝 Actualizando perfil:', profileData)
       
-      // Por ahora solo actualizar localmente
-      // Aquí puedes agregar llamada al backend para actualizar perfil
       this.currentUser = { ...this.currentUser, ...profileData, profileComplete: true }
       storage.setUser(this.currentUser)
       
@@ -153,4 +156,5 @@ export const getUser = () => auth.getUser()
 export const isLoggedIn = () => auth.checkAuth()
 export const isLaboratory = () => auth.isLaboratory()
 export const isPatient = () => auth.isPatient()
+export const getToken = () => auth.getToken() // CAMBIO: Nueva función para obtener token
 export const updateProfile = (data) => auth.updateProfile(data)

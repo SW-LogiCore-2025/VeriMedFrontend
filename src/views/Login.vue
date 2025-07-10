@@ -121,7 +121,7 @@ const handleLogin = async () => {
       if (response.user.type === 'laboratory') {
         router.push('/search')
       } else {
-        router.push('/')
+        router.push('/home')
       }
     } else {
       error.value = 'Respuesta inválida del servidor'

@@ -1,38 +1,44 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import { guestOnly, requireAuth } from '@/iam/guards.js' // ← LÍNEA NUEVA
+import { guestOnly, requireAuth } from '@/iam/guards.js'
 
-// Tus imports existentes
 import Home from '@/views/Home.vue'
 import Search from '@/views/Search.vue'
 import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import ListProducts from '@/views/ListProducts.vue'
-// import Profile from '@/views/Profile.vue' // Si tienes una vista de perfil
-
 
 const routes = [
-  // Rutas públicas (sin cambios)
-  { path: '/', component: Home },
-  { path: '/search', component: Search },
-  
-  // Rutas de autenticación - solo para usuarios NO logueados
-  { 
-    path: '/login', 
-    component: Login,
-    beforeEnter: guestOnly  // ← AGREGADO: evita que usuarios logueados accedan
+  // Ruta raíz redirige al login si no está autenticado, o al Home si lo está
+  {
+    path: '/',
+    beforeEnter: (to, from, next) => {
+      const isLoggedIn = requireAuth() // Verifica si el usuario está autenticado
+      if (isLoggedIn) {
+        next('/home') // Redirige al Home si está autenticado
+      } else {
+        next('/login') // Redirige al Login si no está autenticado
+      }
+    }
   },
-  { 
-    path: '/register', 
+  { path: '/home', component: Home }, // Ruta para la vista Home
+  { path: '/search', component: Search },
+  {
+    path: '/login',
+    name: 'login', // Agregar el nombre de la ruta
+    component: Login,
+    beforeEnter: guestOnly
+  },
+  {
+    path: '/register',
+    name: 'register', // Agregar el nombre de la ruta
     component: Register,
-    beforeEnter: guestOnly  // ← AGREGADO: evita que usuarios logueados accedan
+    beforeEnter: guestOnly
   },
   {
     path: '/list-products',
     component: ListProducts
   }
-  // Si tienes ruta de perfil, descomenta esta línea:
-  // { path: '/profile', component: Profile, beforeEnter: requireAuth },
 ]
 
 const router = createRouter({

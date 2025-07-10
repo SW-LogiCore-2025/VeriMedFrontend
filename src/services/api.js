@@ -48,5 +48,9 @@ export default {
 
   getBatchesByUser(userId) {
     return api.get(`/batch/by-user/${userId}`)
+  },
+
+  getContractName() {
+    return axios.get(`${import.meta.env.VITE_BACKEND_URL}blockchain/contract-name`); // Ruta completa sin usar la baseURL
   }
 }

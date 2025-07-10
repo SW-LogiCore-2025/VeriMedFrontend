@@ -1,323 +1,622 @@
 <template>
-  <div class="login-container">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          <div class="login-form" :class="{ 'animate': isVisible }" ref="formRef">
-            <div class="text-center mb-4">
-              <div class="logo-placeholder mb-3">
-                <h2 style="color: var(--secondary-color); font-weight: 800; font-size: 2.5rem;">VeriMed</h2>
-              </div>
-              <h1>Iniciar Sesión</h1>
-              <p class="subtitle">Accede a tu cuenta VeriMed</p>
-            </div>
-
-            <!-- CAMBIO: Mostrar errores si los hay -->
-            <div v-if="error" class="alert alert-danger mb-3">
-              {{ error }}
-            </div>
-
-            <form @submit.prevent="handleLogin">
-              <!-- Email/Username -->
-              <div class="mb-3">
-                <input 
-                  v-model="loginData.username"
-                  type="text" 
-                  class="form-control" 
-                  placeholder="Nombre de usuario"
-                  required
-                >
-              </div>
-
-              <!-- Password -->
-              <div class="mb-3">
-                <input 
-                  v-model="loginData.password"
-                  type="password" 
-                  class="form-control" 
-                  placeholder="Contraseña"
-                  required
-                >
-              </div>
-
-              <!-- Remember me -->
-              <div class="form-check mb-4">
-                <input 
-                  v-model="rememberMe"
-                  class="form-check-input" 
-                  type="checkbox" 
-                  id="rememberMe"
-                >
-                <label class="form-check-label" for="rememberMe">
-                  Recordarme
-                </label>
-              </div>
-
-              <!-- Submit button -->
-              <button 
-                type="submit" 
-                class="btn btn-primary w-100 mb-3"
-                :disabled="loading"
-              >
-                <span v-if="loading">Iniciando sesión...</span>
-                <span v-else>Iniciar Sesión</span>
-              </button>
-
-              <!-- Forgot password -->
-              <div class="text-center mb-3">
-                <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
-              </div>
-
-              <!-- Register link -->
-              <div class="text-center">
-                <span class="register-text">¿No tienes cuenta? </span>
-                <router-link to="/register" class="register-link">Regístrate aquí</router-link>
-              </div>
-            </form>
+  <div class="login-page">
+    <div class="login-container">
+      <div class="login-background">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+        <div class="bg-circle circle-3"></div>
+        <div class="bg-pattern"></div>
+      </div>
+      
+      
+      <div class="login-content">
+        <div class="login-header">
+          <div class="logo">
+            <img 
+              src="https://res.cloudinary.com/drkelnilg/image/upload/v1752046529/imagen_2025-07-09_023451036-removebg-preview_eaavmj.png" 
+              alt="VeriMed Logo" 
+              class="logo-image"
+            />
+            <h1 class="brand-name">VeriMed</h1>
           </div>
+          <p class="brand-tagline">Plataforma segura de verificación farmacéutica</p>
+        </div>
+
+       
+        <Card class="login-card">
+          <template #content>
+            <div class="login-form">
+              <div class="form-header">
+                <h2 class="form-title">Iniciar Sesión</h2>
+                <p class="form-subtitle">Accede a tu cuenta VeriMed</p>
+              </div>
+
+              
+              <div v-if="authStore.error" class="error-message">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>{{ authStore.error }}</span>
+              </div>
+
+              
+              <form @submit.prevent="handleLogin" class="form">
+                <div class="field">
+                  <label for="username" class="field-label">
+                    <i class="pi pi-user"></i>
+                    Nombre de usuario
+                  </label>
+                  <InputText
+                    id="username"
+                    v-model="loginData.username"
+                    placeholder="Ingresa tu usuario"
+                    class="w-full input-field"
+                    size="large"
+                    :invalid="authStore.error && !loginData.username"
+                    required
+                  />
+                </div>
+
+                <!-- Campo contraseña -->
+                <div class="field">
+                  <label for="password" class="field-label">
+                    <i class="pi pi-lock"></i>
+                    Contraseña
+                  </label>
+                  <Password
+                    id="password"
+                    v-model="loginData.password"
+                    placeholder="Ingresa tu contraseña"
+                    class="w-full"
+                    input-class="input-field"
+                    size="large"
+                    :feedback="false"
+                    toggleMask
+                    :invalid="authStore.error && !loginData.password"
+                    required
+                  />
+                </div>
+
+                <!-- Recordarme -->
+                <div class="field-checkbox">
+                  <Checkbox
+                    id="rememberMe"
+                    v-model="rememberMe"
+                    :binary="true"
+                    @change="authStore.setRememberMe($event)"
+                  />
+                  <label for="rememberMe" class="checkbox-label">
+                    Recordarme en este dispositivo
+                  </label>
+                </div>
+
+                <!-- Botón de login -->
+                <Button
+                  type="submit"
+                  label="Iniciar Sesión"
+                  icon="pi pi-sign-in"
+                  class="login-button"
+                  size="large"
+                  :loading="authStore.loading"
+                  :disabled="!loginData.username || !loginData.password"
+                />
+
+                <!-- Link de olvidé contraseña -->
+                <div class="forgot-password">
+                  <a href="#" class="forgot-link">
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+
+                <!-- Separador -->
+                <div class="divider">
+                  <span class="divider-text">o</span>
+                </div>
+
+                <!-- Link de registro -->
+                <div class="register-section">
+                  <span class="register-text">¿No tienes una cuenta?</span>
+                  <router-link to="/register" class="register-link">
+                    Regístrate aquí
+                  </router-link>
+                </div>
+              </form>
+            </div>
+          </template>
+        </Card>
+
+        <!-- Footer -->
+        <div class="login-footer">
+          <p>&copy; 2025 VeriMed. Tecnología blockchain para la autenticidad farmacéutica.</p>
         </div>
       </div>
     </div>
+
+    <!-- Toast para notificaciones -->
+    <Toast />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { login } from '@/iam/auth.js'
+import { useAuthStore } from '@/iam/auth.js'
+import { useToast } from 'primevue/usetoast'
 
 const router = useRouter()
-const formRef = ref(null)
-const isVisible = ref(false)
-const loading = ref(false)
-const error = ref('')
-const rememberMe = ref(false) // CAMBIO: Agregar variable faltante
+const authStore = useAuthStore()
+const toast = useToast()
 
 const loginData = ref({
   username: '',
   password: ''
 })
 
+const rememberMe = ref(false)
+
 onMounted(() => {
-  const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          isVisible.value = true
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.1 }
-  )
-  if (formRef.value) observer.observe(formRef.value)
+  
+  authStore.syncWithAuth()
+  authStore.clearError()
 })
 
 const handleLogin = async () => {
-  loading.value = true
-  error.value = ''
-
   try {
-    const response = await login(loginData.value.username, loginData.value.password)
+    authStore.setRememberMe(rememberMe.value)
+    const response = await authStore.login(loginData.value)
 
-    if (response.success && response.user) {
-      // CAMBIO: Mejorar el manejo del localStorage
-      if (rememberMe.value) {
-        // Solo guardar en localStorage si "recordarme" está marcado
-        localStorage.setItem('verimed_user', JSON.stringify(response.user))
-      }
+    if (response.success) {
       
-      // CAMBIO: Siempre guardar en sessionStorage para la sesión actual
-      sessionStorage.setItem('userId', String(response.user.id))
-      sessionStorage.setItem('authToken', response.user.token)
+      toast.add({
+        severity: 'success',
+        summary: '¡Bienvenido!',
+        detail: `Hola ${response.user.name || response.user.username}`,
+        life: 3000
+      })
 
-      // CAMBIO: Redirecciones corregidas según el tipo de usuario
-      if (response.user.type === 'laboratory' || response.user.role === 'laboratory') {
-        console.log('🏭 Redirigiendo laboratorio a /search')
+      
+      if (authStore.isLaboratory) {
         router.push('/search')
       } else {
-        console.log('👨‍⚕️ Redirigiendo paciente/usuario a /home')
         router.push('/home')
       }
     } else {
-      error.value = response.error || 'Respuesta inválida del servidor'
+      
+      toast.add({
+        severity: 'error',
+        summary: 'Error de autenticación',
+        detail: response.error,
+        life: 5000
+      })
     }
-  } catch (err) {
-    console.error('Error al iniciar sesión:', err)
-    error.value = 'Error de conexión. Intenta nuevamente.'
-  } finally {
-    loading.value = false
+  } catch (error) {
+    console.error('Error inesperado:', error)
+    toast.add({
+      severity: 'error',
+      summary: 'Error inesperado',
+      detail: 'Ocurrió un error. Intenta nuevamente.',
+      life: 5000
+    })
   }
 }
 </script>
 
 <style scoped>
-.login-container {
-  background: var(--background-color);
-  padding: 20px;
-  min-height: 100vh; /* CAMBIO: Asegurar altura completa */
+.login-page {
+  min-height: 100vh;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #203459 0%, #0a1529 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
   align-items: center;
 }
 
-.login-form {
-  background: var(--primary-color);
-  padding: 40px;
-  border-radius: 20px;
-  color: var(--secondary-text-color);
+
+.login-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(108, 138, 195, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(164, 189, 236, 0.08) 0%, transparent 50%);
+  background-size: 400px 400px;
+  animation: float 20s ease-in-out infinite;
+}
+
+.bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(108, 138, 195, 0.1);
+  animation: floatCircle 8s ease-in-out infinite;
+}
+
+.circle-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  left: -150px;
+  animation-delay: 0s;
+}
+
+.circle-2 {
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  right: -100px;
+  animation-delay: 3s;
+}
+
+.circle-3 {
+  width: 150px;
+  height: 150px;
+  bottom: -75px;
+  left: 30%;
+  animation-delay: 6s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(20px, -20px) rotate(120deg); }
+  66% { transform: translate(-15px, 15px) rotate(240deg); }
+}
+
+@keyframes floatCircle {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-30px) scale(1.05); }
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 500px;
+}
+
+
+.login-header {
+  text-align: center;
+  color: var(--text-white);
+  margin-bottom: var(--spacing-md);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.logo-image {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  drop-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.brand-name {
   font-family: 'Funnel Sans', sans-serif;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.login-form.animate {
-  animation: slideIn 0.8s ease-out;
-}
-
-.logo-placeholder {
-  display: inline-block;
-}
-
-h1 {
-  color: var(--secondary-text-color);
-  font-family: 'Funnel Sans', sans-serif;
+  font-size: 3.2rem;
   font-weight: 800;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #a4bdec 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
 }
 
-.subtitle {
-  color: var(--tertiary-text-color);
-  font-family: 'Albert Sans', sans-serif;
+.brand-tagline {
   font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
   font-weight: 300;
-  margin-bottom: 30px;
 }
 
-/* CAMBIO: Estilo para errores */
-.alert {
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  font-family: 'Albert Sans', sans-serif;
+
+.login-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+  width: 100%;
 }
 
-.alert-danger {
-  background-color: rgba(220, 53, 69, 0.1);
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  color: #dc3545;
+.login-form {
+  padding: var(--spacing-xl);
 }
 
-.form-control {
-  background: transparent;
-  border: 1px solid var(--background-color);
-  border-radius: 15px;
-  padding: 15px 20px;
-  color: var(--secondary-text-color);
+.form-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.form-title {
+  font-family: 'Funnel Sans', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-white);
+  margin: 0 0 var(--spacing-xs) 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.form-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
   font-size: 1rem;
-  margin-bottom: 10px;
 }
 
-.form-control::placeholder {
-  color: var(--tertiary-text-color);
+/* Error message */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--border-radius);
+  color: #fecaca;
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+  backdrop-filter: blur(10px);
 }
 
-.form-control:focus {
-  background: transparent;
-  border-color: var(--secondary-color);
-  color: var(--secondary-text-color);
-  box-shadow: none;
-  outline: none;
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
-.form-check-input {
-  background: transparent;
-  border: 1px solid var(--background-color);
-  margin-right: 10px;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
-.form-check-input:checked {
-  background-color: var(--secondary-color);
-  border-color: var(--secondary-color);
-}
-
-.form-check-label {
-  color: var(--secondary-text-color);
-  font-family: 'Albert Sans', sans-serif;
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-weight: 600;
+  color: var(--text-white);
   font-size: 0.9rem;
 }
 
-.btn-primary {
-  background-color: var(--secondary-color);
-  border: none;
-  border-radius: 25px;
-  padding: 15px 30px;
+/* Input fields glassmorphism */
+:deep(.input-field) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  font-size: 1rem !important;
+}
+
+:deep(.input-field::placeholder) {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+:deep(.input-field:focus) {
+  border-color: #6c8ac3 !important;
+  box-shadow: 0 0 0 2px rgba(108, 138, 195, 0.3) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+
+:deep(.p-password) {
+  width: 100%;
+}
+
+:deep(.p-password .p-inputtext) {
+  width: 100% !important;
+}
+
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+:deep(.p-checkbox .p-checkbox-box) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px);
+}
+
+:deep(.p-checkbox .p-checkbox-box.p-highlight) {
+  background: #6c8ac3 !important;
+  border-color: #6c8ac3 !important;
+}
+
+.checkbox-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+.login-button {
+  background: linear-gradient(135deg, #6c8ac3 0%, #4f46e5 100%) !important;
+  border: none !important;
   font-weight: 600;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+  margin-top: var(--spacing-sm);
+  border-radius: var(--border-radius) !important;
+  box-shadow: 0 4px 15px rgba(108, 138, 195, 0.4) !important;
+  transition: all 0.3s ease !important;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--secondary-hover-color);
-  transform: translateY(-2px);
+.login-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(108, 138, 195, 0.6) !important;
 }
 
-.btn-primary:disabled {
+.login-button:disabled {
   opacity: 0.6;
-  cursor: not-allowed;
+  transform: none !important;
 }
 
 .forgot-password {
-  color: var(--tertiary-text-color);
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
+  text-align: center;
+  margin-top: var(--spacing-sm);
 }
 
-.forgot-password:hover {
-  color: var(--secondary-color);
+.forgot-link {
+  color: #a4bdec;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.forgot-link:hover {
+  color: #6c8ac3;
+  text-decoration: underline;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: var(--spacing-md) 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.divider-text {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 0 var(--spacing-md);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.register-section {
+  text-align: center;
+  margin-top: var(--spacing-sm);
 }
 
 .register-text {
-  color: var(--secondary-text-color);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
 }
 
 .register-link {
-  color: var(--secondary-color);
+  color: #a4bdec;
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.3s ease;
+  margin-left: var(--spacing-xs);
+  transition: var(--transition);
 }
 
 .register-link:hover {
-  color: var(--secondary-hover-color);
+  color: #6c8ac3;
+  text-decoration: underline;
 }
 
-label {
-  color: var(--secondary-text-color);
-  font-family: 'Albert Sans', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-bottom: 8px;
+/* Footer */
+.login-footer {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  margin-top: var(--spacing-md);
 }
 
-@keyframes slideIn {
-  0% {
-    transform: translateY(-30px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .login-form {
-    margin: 20px;
-    padding: 30px 25px;
+  .login-page {
+    padding: var(--spacing-sm);
   }
   
-  h1 {
+  .brand-name {
+    font-size: 2.5rem;
+  }
+  
+  .logo-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .login-form {
+    padding: var(--spacing-md);
+  }
+  
+  .bg-circle {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-name {
     font-size: 2rem;
+  }
+  
+  .form-title {
+    font-size: 1.8rem;
+  }
+}
+
+
+.login-card {
+  animation: slideUp 0.8s ease-out;
+}
+
+.login-header {
+  animation: fadeIn 1s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>

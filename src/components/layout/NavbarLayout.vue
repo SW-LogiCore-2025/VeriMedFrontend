@@ -1,219 +1,463 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="https://res.cloudinary.com/drkelnilg/image/upload/v1752046529/imagen_2025-07-09_023451036-removebg-preview_eaavmj.png" alt="logo" style="min-width: 100px; max-width: 120px">
-        <span class="navbar-title ms-2">VeriMed</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-              data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-              aria-label="Toggle navigation">
-        <span class="pi pi-bars"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          
-          <!-- CAMBIO 2: Solo mostrar Inicio y Gestión si NO estás en login/register -->
-          <template v-if="!isAuthPage">
-            <li class="nav-item">
-              <router-link class="nav-link mx-3" to="/home">Inicio</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link mx-3" to="/search">Gestión</router-link>
-            </li>
-          </template>
-
-          <!-- Si NO está logueado Y NO está en página de auth -->
-          <template v-if="!isUserLoggedIn && !isAuthPage">
-            <li class="nav-item">
-              <router-link class="nav-link mx-3" to="/login">Iniciar Sesión</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link mx-3 register-btn" to="/register">Registrarse</router-link>
-            </li>
-          </template>
-
-          <!-- Si NO está logueado Y SÍ está en página de auth -->
-          <template v-if="!isUserLoggedIn && isAuthPage">
-            <li class="nav-item" v-if="$route.path === '/login'">
-              <router-link class="nav-link mx-3 register-btn" to="/register">Registrarse</router-link>
-            </li>
-            <li class="nav-item" v-if="$route.path === '/register'">
-              <router-link class="nav-link mx-3" to="/login">Iniciar Sesión</router-link>
-            </li>
-          </template>
-
-          <!-- Si SÍ está logueado -->
-          <template v-if="isUserLoggedIn">
-            <li class="nav-item">
-              <span class="nav-link mx-3 user-info">
-                <i :class="userIcon"></i>
-                {{ currentUser.name || currentUser.username }}
-              </span>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link mx-3" to="/profile">Mi Perfil</router-link>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link mx-3 btn-logout" @click="handleLogout">
-                <i class="fas fa-sign-out-alt"></i>
-                Cerrar Sesión
-              </button>
-            </li>
-          </template>
-        </ul>
+  <Menubar :model="menuItems" class="custom-menubar">
+    <!-- Logo y marca -->
+    <template #start>
+      <div class="navbar-brand" @click="router.push('/')">
+        <img 
+          src="https://res.cloudinary.com/drkelnilg/image/upload/v1752046529/imagen_2025-07-09_023451036-removebg-preview_eaavmj.png" 
+          alt="VeriMed Logo" 
+          class="logo-image"
+        />
+        <span class="brand-text">VeriMed</span>
       </div>
-    </div>
-  </nav>
+    </template>
+
+    <!-- Área derecha -->
+    <template #end>
+      <div class="navbar-end">
+        <!-- Si NO está logueado -->
+        <template v-if="!authStore.isLoggedIn">
+          <!-- En páginas de auth, mostrar botón contrario -->
+          <template v-if="isAuthPage">
+            <Button
+              v-if="$route.path === '/login'"
+              label="Registrarse"
+              icon="pi pi-user-plus"
+              outlined
+              class="auth-button outlined"
+              @click="router.push('/register')"
+            />
+            <Button
+              v-if="$route.path === '/register'"
+              label="Iniciar Sesión"
+              icon="pi pi-sign-in"
+              class="auth-button"
+              @click="router.push('/login')"
+            />
+          </template>
+          
+          <!-- En otras páginas, mostrar ambos botones -->
+          <template v-else>
+            <Button
+              label="Iniciar Sesión"
+              icon="pi pi-sign-in"
+              text
+              class="auth-button-text"
+              @click="router.push('/login')"
+            />
+            <Button
+              label="Registrarse"
+              icon="pi pi-user-plus"
+              class="auth-button"
+              @click="router.push('/register')"
+            />
+          </template>
+        </template>
+
+        <!-- Si SÍ está logueado -->
+        <template v-else>
+          <div class="user-section">
+            <!-- Avatar con menú -->
+            <Menu ref="userMenu" :model="userMenuItems" :popup="true" class="user-dropdown" />
+            <div class="user-info" @click="toggleUserMenu">
+              <Avatar 
+                :label="authStore.userInitials"
+                shape="circle"
+                size="normal"
+                class="user-avatar"
+              />
+              <div class="user-details">
+                <span class="user-name">{{ authStore.user?.name || authStore.user?.username }}</span>
+                <span class="user-role">{{ userRoleText }}</span>
+              </div>
+              <i class="pi pi-chevron-down user-chevron"></i>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+  </Menubar>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { auth, logout } from '@/iam/auth.js'
+import { useAuthStore } from '@/iam/auth.js'
+import { useToast } from 'primevue/usetoast'
 
 const router = useRouter()
 const route = useRoute()
-const isUserLoggedIn = ref(false)
-const currentUser = ref(null)
+const authStore = useAuthStore()
+const toast = useToast()
+const userMenu = ref()
 
-// CAMBIO 3: Computed para detectar si estamos en página de autenticación
+// Detectar si estamos en página de autenticación
 const isAuthPage = computed(() => {
   return route.path === '/login' || route.path === '/register'
 })
 
-// Computed para el icono del usuario
-const userIcon = computed(() => {
-  if (!currentUser.value) return 'fas fa-user'
-  return currentUser.value.type === 'laboratory' ? 'fas fa-industry' : 'fas fa-user-md'
+// Texto del rol del usuario
+const userRoleText = computed(() => {
+  if (authStore.isLaboratory) return 'Laboratorio'
+  if (authStore.isPatient) return 'Paciente'
+  return 'Usuario'
 })
 
-onMounted(() => {
-  checkUserStatus()
+// Items del menú principal (solo se muestran si está logueado y no está en auth pages)
+const menuItems = computed(() => {
+  if (!authStore.isLoggedIn || isAuthPage.value) return []
+  
+  return [
+    {
+      label: 'Inicio',
+      icon: 'pi pi-home',
+      command: () => router.push('/home')
+    },
+    {
+      label: 'Gestión',
+      icon: 'pi pi-cog',
+      command: () => router.push('/search'),
+      visible: authStore.isLaboratory // Solo para laboratorios
+    }
+  ].filter(item => item.visible !== false)
 })
 
-const checkUserStatus = () => {
-  isUserLoggedIn.value = auth.checkAuth()
-  currentUser.value = auth.getUser()
-
-  if (isUserLoggedIn.value) {
-    console.log('👤 Usuario logueado:', currentUser.value.username)
+// Items del menú de usuario
+const userMenuItems = ref([
+  {
+    label: 'Mi Perfil',
+    icon: 'pi pi-user',
+    command: () => router.push('/profile')
+  },
+  {
+    label: 'Configuración',
+    icon: 'pi pi-cog',
+    command: () => toast.add({
+      severity: 'info',
+      summary: 'Próximamente',
+      detail: 'Esta función estará disponible pronto'
+    })
+  },
+  {
+    separator: true
+  },
+  {
+    label: 'Cerrar Sesión',
+    icon: 'pi pi-sign-out',
+    command: handleLogout
   }
+])
+
+// Toggle del menú de usuario
+const toggleUserMenu = (event) => {
+  userMenu.value.toggle(event)
 }
 
-const handleLogout = () => {
-  console.log('🚪 Cerrando sesión...')
-  logout()
-  isUserLoggedIn.value = false
-  currentUser.value = null
-  router.push('/login') // CAMBIO 4: Redirigir a login en lugar de home
-  console.log('✅ Sesión cerrada')
+// Manejar logout
+function handleLogout() {
+  authStore.logout() // Usa tu sistema IAM + actualiza store
+  
+  toast.add({
+    severity: 'success',
+    summary: 'Sesión cerrada',
+    detail: 'Has cerrado sesión exitosamente',
+    life: 3000
+  })
+  
+  router.push('/login')
 }
-
-// Escuchar cambios de ruta para actualizar estado
-router.afterEach(() => {
-  checkUserStatus()
-})
 </script>
 
 <style scoped>
-.navbar-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--secondary-text-color);
-  font-family: 'Funnel Sans', sans-serif;
-}
-.navbar {
-  background-color: var(--primary-color, #ffffff);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1030;
-  min-height: var(--navbar-height);
-}
-
-.navbar-brand img {
-  max-height: 70px;
-  object-fit: contain;
-  height: auto;
-  width: auto;
-}
-
-.nav-link {
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--secondary-text-color);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
+/* Menubar personalizado */
+.custom-menubar {
+  background: linear-gradient(135deg, #203459 0%, #2c4a6b 100%) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 var(--spacing-lg) !important;
+  height: var(--navbar-height);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
   position: relative;
-  margin: 0 10px;
-  padding: 10px 12px;
-  letter-spacing: 0.8px;
 }
 
-.nav-link::after {
-  content: "";
+.custom-menubar::before {
+  content: '';
   position: absolute;
-  width: 0;
-  height: 3px;
-  background-color: var(--secondary-text-color);
-  bottom: 0;
+  top: 0;
   left: 0;
-  transition: width 0.1s ease-in;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
 }
 
-.nav-link:hover::after {
-  width: 100%;
+/* Brand */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 10;
+  position: relative;
 }
 
-.nav-link:hover {
-  color: var(--secondary-text-color);
+.navbar-brand:hover {
+  transform: translateY(-1px);
 }
 
-.nav-link.active::after {
-  width: 100%;
+.logo-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  drop-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-.register-btn {
-  background-color: var(--secondary-color);
-  border-radius: 20px;
-  transition: all 0.3s ease;
+.brand-text {
+  font-family: 'Funnel Sans', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-white);
+  background: linear-gradient(135deg, #ffffff 0%, #a4bdec 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
 }
 
-.register-btn::after {
-  display: none;
+/* Área derecha */
+.navbar-end {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  z-index: 10;
+  position: relative;
 }
 
-.register-btn:hover {
-  background-color: var(--secondary-hover-color);
-  transform: translateY(-2px);
+/* Botones de autenticación */
+:deep(.auth-button) {
+  background: linear-gradient(135deg, #6c8ac3 0%, #4f46e5 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 500 !important;
+  transition: var(--transition) !important;
+  border-radius: var(--border-radius) !important;
+  box-shadow: 0 2px 10px rgba(108, 138, 195, 0.3) !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+:deep(.auth-button:hover) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 15px rgba(108, 138, 195, 0.5) !important;
+  background: linear-gradient(135deg, #5a75b0 0%, #4338ca 100%) !important;
+}
+
+:deep(.auth-button.outlined) {
+  background: transparent !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  color: var(--text-white) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1) !important;
+}
+
+:deep(.auth-button.outlined:hover) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2) !important;
+}
+
+:deep(.auth-button-text) {
+  color: var(--text-white) !important;
+  font-weight: 500 !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: var(--border-radius) !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+:deep(.auth-button-text:hover) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Sección de usuario */
+.user-section {
+  position: relative;
 }
 
 .user-info {
-  color: var(--secondary-color) !important;
-  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-logout {
-  background: none;
-  border: none;
-  color: var(--tertiary-text-color);
-  font-size: 16px;
-  font-weight: 400;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
   cursor: pointer;
-  padding: 10px 12px;
-  letter-spacing: 0.8px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  transition: var(--transition);
+  color: var(--text-white);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.btn-logout:hover {
-  color: var(--secondary-text-color);
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, #6c8ac3 0%, #4f46e5 100%) !important;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(108, 138, 195, 0.3);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  line-height: 1;
+}
+
+.user-chevron {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  transition: var(--transition);
+}
+
+.user-info:hover .user-chevron {
+  opacity: 1;
+  transform: translateY(1px);
+}
+
+/* Override PrimeVue menubar styles */
+:deep(.p-menubar) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+:deep(.p-menubar .p-menubar-root-list) {
+  background: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+:deep(.p-menubar .p-menubar-start) {
+  display: flex !important;
+  align-items: center !important;
+}
+
+:deep(.p-menubar .p-menubar-end) {
+  display: flex !important;
+  align-items: center !important;
+  margin-left: auto !important;
+}
+
+:deep(.p-menubar .p-menuitem-link) {
+  color: var(--text-white) !important;
+  font-weight: 500;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  backdrop-filter: blur(10px);
+}
+
+:deep(.p-menubar .p-menuitem-link:hover) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-white) !important;
+  transform: translateY(-1px);
+}
+
+:deep(.p-menubar .p-menuitem-icon) {
+  margin-right: var(--spacing-xs);
+}
+
+/* Menu flotante de usuario */
+:deep(.user-dropdown) {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  margin-top: var(--spacing-xs);
+}
+
+:deep(.user-dropdown .p-menuitem-link) {
+  color: var(--text-primary) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  transition: var(--transition);
+  backdrop-filter: none;
+}
+
+:deep(.user-dropdown .p-menuitem-link:hover) {
+  background: rgba(108, 138, 195, 0.1) !important;
+  color: var(--primary-color) !important;
+}
+
+:deep(.user-dropdown .p-separator) {
+  margin: var(--spacing-xs) 0;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .custom-menubar {
+    padding: 0 var(--spacing-sm) !important;
+  }
+  
+  .brand-text {
+    font-size: 1.5rem;
+  }
+  
+  .logo-image {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .user-details {
+    display: none;
+  }
+  
+  .auth-button {
+    font-size: 0.85rem;
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-end {
+    gap: var(--spacing-xs);
+  }
+  
+  .auth-button .p-button-label {
+    display: none;
+  }
+  
+  .auth-button {
+    padding: var(--spacing-xs) !important;
+    min-width: 40px;
+  }
 }
 </style>

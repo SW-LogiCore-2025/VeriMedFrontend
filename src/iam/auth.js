@@ -1,5 +1,7 @@
-// src/iam/auth.js - ACTUALIZADO con redirecciones corregidas
+
+import { defineStore } from 'pinia'
 import { storage } from './storage.js'
+
 
 class SimpleAuth {
   constructor() {
@@ -8,7 +10,7 @@ class SimpleAuth {
     this.baseURL = `${import.meta.env.VITE_BACKEND_URL}api/v1/authentication`
   }
 
-  // Login con endpoint real
+  
   async login(username, password) {
     try {
       console.log('🔐 Intentando login con backend...')
@@ -32,17 +34,17 @@ class SimpleAuth {
       const data = await response.json()
       console.log('✅ Respuesta del backend:', data)
       
-      // Extraer datos del usuario según respuesta del backend
+      
       const userData = {
         username: data.username || username,
         type: data.role || data.userType || 'patient',
         name: data.name || data.fullName || username,
         email: data.email || '',
         id: data.id || data.userId,
-        token: data.token || data.accessToken // CAMBIO: Guardar token en userData
+        token: data.token || data.accessToken
       }
       
-      // Guardar usuario y token
+      
       this.currentUser = userData
       this.isLoggedIn = true
       storage.setUser(userData)
@@ -56,7 +58,7 @@ class SimpleAuth {
     }
   }
 
-  // Registro con endpoint real  
+  
   async register(userData) {
     try {
       console.log('📝 Registrando usuario con backend...', userData)
@@ -95,7 +97,7 @@ class SimpleAuth {
     }
   }
 
-  // Logout simple
+  
   logout() {
     console.log('🚪 Cerrando sesión...')
     this.currentUser = null
@@ -103,32 +105,27 @@ class SimpleAuth {
     storage.clear()
   }
 
-  // Obtener usuario actual
+  
   getUser() {
     return this.currentUser
   }
 
-  // Verificar si está logueado
   checkAuth() {
     return this.isLoggedIn
   }
 
-  // Verificar si es laboratorio
   isLaboratory() {
     return this.currentUser?.type === 'laboratory' || this.currentUser?.role === 'laboratory'
   }
 
-  // Verificar si es paciente
   isPatient() {
     return this.currentUser?.type === 'patient' || this.currentUser?.role === 'patient'
   }
 
-  // CAMBIO: Obtener token directamente
   getToken() {
     return this.currentUser?.token || storage.getToken()
   }
 
-  // Actualizar perfil (para futuro)
   async updateProfile(profileData) {
     try {
       console.log('📝 Actualizando perfil:', profileData)
@@ -145,10 +142,120 @@ class SimpleAuth {
   }
 }
 
-// Crear instancia global
+//Pinia
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+   
+    user: auth.getUser(),
+    isLoggedIn: auth.checkAuth(),
+    loading: false,
+    error: null,
+    rememberMe: false
+  }),
+
+  getters: {
+    isLaboratory: () => auth.isLaboratory(),
+    isPatient: () => auth.isPatient(),
+    token: () => auth.getToken(),
+    
+    userInitials: (state) => {
+      if (!state.user?.name && !state.user?.username) return 'U'
+      const name = state.user.name || state.user.username
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    },
+    
+    userIcon: () => {
+      if (auth.isLaboratory()) return 'pi pi-building'
+      if (auth.isPatient()) return 'pi pi-user'
+      return 'pi pi-user'
+    }
+  },
+
+  actions: {
+    async login(credentials) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        
+        const response = await auth.login(credentials.username, credentials.password)
+        
+        if (response.success) {
+         
+          this.user = auth.getUser()
+          this.isLoggedIn = auth.checkAuth()
+          
+         
+          if (this.rememberMe) {
+            localStorage.setItem('verimed_user', JSON.stringify(this.user))
+          }
+        } else {
+          this.error = response.error
+        }
+        
+        return response
+        
+      } catch (error) {
+        this.error = error.message
+        return { success: false, error: error.message }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async register(userData) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        
+        const response = await auth.register(userData)
+        
+        if (!response.success) {
+          this.error = response.error
+        }
+        
+        return response
+        
+      } catch (error) {
+        this.error = error.message
+        return { success: false, error: error.message }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    logout() {
+      
+      auth.logout()
+      
+   
+      this.user = null
+      this.isLoggedIn = false
+      this.error = null
+      this.rememberMe = false
+    },
+
+    clearError() {
+      this.error = null
+    },
+
+    setRememberMe(value) {
+      this.rememberMe = value
+    },
+
+   
+    syncWithAuth() {
+      this.user = auth.getUser()
+      this.isLoggedIn = auth.checkAuth()
+    }
+  }
+})
+
+
 export const auth = new SimpleAuth()
 
-// Funciones de conveniencia
+
 export const login = (username, password) => auth.login(username, password)
 export const register = (userData) => auth.register(userData)
 export const logout = () => auth.logout()
@@ -156,5 +263,5 @@ export const getUser = () => auth.getUser()
 export const isLoggedIn = () => auth.checkAuth()
 export const isLaboratory = () => auth.isLaboratory()
 export const isPatient = () => auth.isPatient()
-export const getToken = () => auth.getToken() // CAMBIO: Nueva función para obtener token
+export const getToken = () => auth.getToken()
 export const updateProfile = (data) => auth.updateProfile(data)

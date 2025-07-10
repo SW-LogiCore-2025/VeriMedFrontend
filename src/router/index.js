@@ -11,7 +11,7 @@ import ListProducts from '@/views/ListProducts.vue'
 const routes = [
   // Ruta raíz redirige al login si no está autenticado, o al Home si lo está
   {
-    path: '/',
+    path: '/login',
     beforeEnter: (to, from, next) => {
       const isLoggedIn = requireAuth() // Verifica si el usuario está autenticado
       if (isLoggedIn) {

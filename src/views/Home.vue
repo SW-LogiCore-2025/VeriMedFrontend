@@ -5,7 +5,8 @@ import { useToast } from 'primevue/usetoast';
 import Card from 'primevue/card';
 import Toast from 'primevue/toast';
 import { getUser } from '@/iam/auth.js';
-import api from '@/services/api.js'; // Importar el servicio de API
+import api from '@/services/api.js';
+import { nftService } from '@/services/nftService.js'; // Importar el servicio de NFTs
 
 const router = useRouter();
 const toast = useToast();
@@ -13,11 +14,13 @@ const toast = useToast();
 // Estado local
 const currentUser = ref(null);
 const contractName = ref(''); // Variable para el nombre del contrato
+const nfts = ref([]); // Variable para almacenar los NFTs
 
 // Actualizar usuario al montar
 onMounted(() => {
   currentUser.value = getUser();
-  fetchContractName(); // Llamar a la función para obtener el nombre del contrato
+  fetchContractName(); // Obtener el nombre del contrato
+  fetchNFTs(); // Obtener los NFTs
 });
 
 // Computeds
@@ -46,6 +49,15 @@ const fetchContractName = async () => {
   } catch (error) {
     console.error('Error al obtener el nombre del contrato:', error);
     contractName.value = 'Blockchain'; // Valor por defecto en caso de error
+  }
+};
+
+const fetchNFTs = async () => {
+  try {
+    const allNFTs = await nftService.fetchNFTs(); // Obtener todos los NFTs
+    nfts.value = allNFTs.slice(-3); // Tomar solo los últimos 3
+  } catch (error) {
+    console.error('Error al obtener los NFTs:', error);
   }
 };
 
@@ -153,6 +165,20 @@ const showLabInfo = () => {
                   <span>Verificación inmutable</span>
                 </div>
               </div>
+              <!-- Mostrar los NFTs -->
+              <div class="nft-list">
+                <h4>Tokens NFT:</h4>
+                <div class="nft-grid">
+                  <div v-for="nft in nfts" :key="nft.tokenId" class="nft-card">
+                    <div class="nft-header">
+                      <strong>ID:</strong> {{ nft.tokenId }}
+                    </div>
+                    <div class="nft-body">
+                      <p><strong>URI:</strong> {{ nft.tokenURI }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </template>
         </Card>
@@ -176,6 +202,8 @@ const showLabInfo = () => {
   margin: 0 auto;
   padding: 0 1rem;
 }
+
+
 
 /* Welcome Section */
 .welcome-section {
